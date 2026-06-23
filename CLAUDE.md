@@ -1,6 +1,6 @@
 # Claude Code Context — spiral-buddy-black 🌑
 
-**우주(Physis) 버디.** Spiral Buddy 패밀리의 4번째. Blue(v0.5.107)에서 clone해 분기. 정체성·색·도메인 배선에 더해 **도메인 커스터마이즈(프롬프트·노트 구조·아이콘·카테고리·KaTeX)까지 적용 완료** (2026-06-23). 남은 건 거버넌스·CI뿐 — 아래 TODO 참고.
+**우주(Physis) 버디.** Spiral Buddy 패밀리의 4번째. Blue(v0.5.107)에서 clone해 분기. 정체성·색·도메인 배선 + **도메인 커스터마이즈(프롬프트·노트 구조·아이콘·카테고리·KaTeX) 완료, 거버넌스·CI 정리, 첫 릴리스 [v0.1.0](https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/tag/v0.1.0) published** (2026-06-23, 3 OS 빌드 성공).
 
 ## 정체성 (적용 완료)
 
@@ -29,7 +29,8 @@
 - [x] **거버넌스** (LICENSE/CLA.md/CONTRIBUTING.md/README.md) — 이미 존재했고 Blue 잔재(`spiral-buddy-blue`/`Spiral Buddy Blue`)를 `spiral-buddy-black`으로 정리. 저작권자 Donghee Han 유지. README의 Blue 링크는 의도적 패밀리 참조라 유지.
 - [x] **클라이언트 리브랜드 잔재** — 분기 시 놓친 것들 정리: `client/index.html` 브랜드 타이틀이 "Spiral Buddy Blue"였음(가장 큰 노출), setup wizard·설정 모달의 `iq-dev-lab` 표시 문자열, `displayWorkspaceName`/`_parentDirOfRoadmapRoot`를 `iq-<x>-lab` 제네릭으로. 자동 다운로드 **기능**은 이미 `CURATED_ORG="iq-physis-lab"`로 정상이었고 표시만 잔재였음.
 - [x] **GitHub remote + CI** — origin = `iq-spiral-galaxy/spiral-buddy-black`(이미 연결, public). 워크플로 release.yml(v* 태그 트리거)·cla.yml·dco.yml 존재 + Blue 잔재(릴리스 노트 다운로드 URL·CLA 문서 링크) 정리.
-- [ ] **첫 릴리스로 DMG/exe 아티팩트 이름 검증** — `Spiral.Buddy.Black-*` 추정값이 electron-builder 실제 산출과 맞는지 첫 CI 빌드 후 `gh release view`로 확인하고, 어긋나면 main.cjs buildInstallScript + release.yml 노트 테이블 보정.
+- [x] **첫 릴리스 v0.1.0 published** (2026-06-23) — 3 OS CI 빌드 성공. 아티팩트 이름 `Spiral.Buddy.Black-0.1.0-*`(+ alias `Spiral-Buddy-latest-*`)이 추정과 정확히 일치 → buildInstallScript·릴리스 노트 테이블 검증됨.
+- [x] **CI pnpm 11 빌드게이트 우회** — pnpm 11.1.1이 `onlyBuiltDependencies`(package.json/.npmrc/pnpm-workspace.yaml 전부)를 무시해 electron/esbuild postinstall이 막힘 → `ERR_PNPM_IGNORED_BUILDS` install 실패. release.yml install에 `--config.dangerouslyAllowAllBuilds=true` 추가로 해결(clean-room 재현·검증). **패밀리 공통 잠재 이슈** — Red/Green/Blue도 다음 릴리스 때 동일 패치 필요. [[rgb-multirepo-port-gotchas]] 참고.
 
 ## 실행
 
