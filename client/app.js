@@ -115,6 +115,14 @@ const CATEGORY_ICON_BY_NAME = {
   "cross platform": "shuffle",
   "cross-platform": "shuffle",
   synthesis: "dna",
+  // v0.1.2 (Black) — Physis 7-레이어 (도메인 헤더 + 단일 카테고리가 같은 이름을 공유)
+  "0 · 물리의 언어": "ruler",
+  "1 · 고전 세계": "orbit",
+  "2 · 통계 세계": "thermo",
+  "3 · 양자 세계": "atom",
+  "4 · 상대성과 우주": "saturn",
+  "5 · 미완의 최전선": "telescope",
+  "6 · 종합": "sparkle",
   uncategorized: "folder",
 };
 
@@ -142,6 +150,13 @@ const ICON_SVG = {
   dna: `<path d="M5 4c14 4 0 12 14 16"/><path d="M19 4c-14 4 0 12 -14 16"/><line x1="7" y1="8" x2="14" y2="8"/><line x1="9" y1="12" x2="15" y2="12"/><line x1="9" y1="16" x2="17" y2="16"/>`,
   // v0.5.55 — Backend 도메인용 wrench
   wrench: `<path d="M14.7 6.3a4.5 4.5 0 0 1 5.6 5.6L18 14l-4-4 0.7-2.1z"/><path d="M14 10l-9 9a2 2 0 0 1-3-3l9-9"/>`,
+  // v0.1.2 (Black) — Physis 우주·물리 7-레이어 아이콘 (0 언어 ~ 6 종합)
+  ruler: `<rect x="3.2" y="8.2" width="17.6" height="7.6" rx="1.2"/><path d="M7 8.2v3M11 8.2v3.6M15 8.2v3M19 8.2v2.4"/>`,
+  orbit: `<circle cx="12" cy="12" r="2.4"/><ellipse cx="12" cy="12" rx="9" ry="4.2" transform="rotate(-22 12 12)"/><circle cx="19.4" cy="8.7" r="1.15"/>`,
+  thermo: `<path d="M14 14.9V5.5a2 2 0 0 0-4 0v9.4a3.6 3.6 0 1 0 4 0Z"/><path d="M12 9.5v5.2"/>`,
+  saturn: `<circle cx="12" cy="11.5" r="4.6"/><ellipse cx="12" cy="11.5" rx="9.5" ry="3.1" transform="rotate(-20 12 11.5)"/>`,
+  telescope: `<path d="M4.6 15.2l3.4-1.1 1.3 3-3.4 1.1z"/><path d="M8 14.1l8-2.9 1.5 3.4-8 2.9z"/><path d="M16 11.2l1-2.7 2 .7-1 2.7z"/><path d="M6.3 17.6 5.4 21M9.6 18.4 11 21.4"/>`,
+  sparkle: `<path d="M12 3.5l1.7 5.8 5.8 1.7-5.8 1.7L12 18.5l-1.7-5.8L4.5 11l5.8-1.7z"/><path d="M18.3 4.2l.5 1.7 1.7.5-1.7.5-.5 1.7-.5-1.7-1.7-.5 1.7-.5z"/>`,
 };
 
 function svgIcon(name, className = "inline-icon") {
