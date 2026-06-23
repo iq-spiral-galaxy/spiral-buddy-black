@@ -254,6 +254,13 @@ function cacheEls() {
   els.activitySummary = $("activity-summary");
   els.activityGrid = $("activity-grid");
   els.activityMonthLabels = $("activity-month-labels");
+  // 횡단 원리 색인 (Black 전용)
+  els.principlesOpenBtn = $("principles-open-btn");
+  els.principlesCount = $("principles-count");
+  els.principlesModal = $("principles-modal");
+  els.principlesModalClose = $("principles-modal-close");
+  els.principlesSummary = $("principles-summary");
+  els.principlesList = $("principles-list");
   // settings / workspace
   els.settingsBtn = $("settings-btn");
   els.settingsModal = $("settings-modal");
@@ -638,6 +645,19 @@ function wireEvents() {
     });
   }
 
+  // 횡단 원리 색인
+  if (els.principlesOpenBtn) {
+    els.principlesOpenBtn.addEventListener("click", openPrinciplesModal);
+  }
+  if (els.principlesModalClose) {
+    els.principlesModalClose.addEventListener("click", closePrinciplesModal);
+  }
+  if (els.principlesModal) {
+    els.principlesModal.addEventListener("click", (e) => {
+      if (e.target === els.principlesModal) closePrinciplesModal();
+    });
+  }
+
   // Cmd/Ctrl+K — 검색 모달
   document.addEventListener("keydown", (e) => {
     if ((e.metaKey || e.ctrlKey) && (e.key === "k" || e.key === "K")) {
@@ -820,6 +840,7 @@ async function loadRoadmapData() {
 
     renderChapters();
     renderHistory();
+    refreshPrinciplesCount();
 
     // 다음 챕터 카드(suggestion)는 첫 진행 시에만 띄움.
     // 이미 visited 챕터가 있으면(= 한 번이라도 학습 진행) 노이즈가 되므로 영역 자체 숨김.
@@ -4433,6 +4454,104 @@ function closeActivityModal() {
   els.activityModal.classList.add("hidden");
   els.activityModal.setAttribute("aria-hidden", "true");
   hideActivityTooltip();
+}
+
+// ─── 횡단 원리 색인 (Black 전용) ───────────────────────────────
+// note-writer가 모든 노트에 다는 5개 횡단 원리 태그(대칭·최소작용·엔트로피·
+// 정보·창발)를 전 노트에서 모아, 같은 원리가 어느 레이어/노트에서 나타났는지
+// 보여준다. Physis의 "핵심 무기" = 나선 학습의 연결조직 가시화.
+
+let _principlesData = null;
+
+async function refreshPrinciplesCount() {
+  if (!els.principlesCount) return;
+  try {
+    const data = await fetch("/api/principles").then((r) => r.json());
+    _principlesData = data;
+    const n = data?.taggedNotes ?? 0;
+    els.principlesCount.textContent = String(n);
+  } catch {
+    els.principlesCount.textContent = "—";
+  }
+}
+
+async function openPrinciplesModal() {
+  if (!els.principlesModal) return;
+  els.principlesModal.classList.remove("hidden");
+  els.principlesModal.setAttribute("aria-hidden", "false");
+  els.principlesList.innerHTML = `<div class="principles-empty">loading…</div>`;
+  els.principlesSummary.textContent = "";
+  try {
+    const data = await fetch("/api/principles").then((r) => r.json());
+    _principlesData = data;
+    if (els.principlesCount) {
+      els.principlesCount.textContent = String(data?.taggedNotes ?? 0);
+    }
+    renderPrinciples(data);
+  } catch (err) {
+    els.principlesList.innerHTML = `<div class="principles-empty">로드 실패: ${escapeHtml(err.message)}</div>`;
+  }
+}
+
+function closePrinciplesModal() {
+  if (!els.principlesModal) return;
+  els.principlesModal.classList.add("hidden");
+  els.principlesModal.setAttribute("aria-hidden", "true");
+}
+
+function renderPrinciples(data) {
+  if (!els.principlesList) return;
+  const principles = data?.principles ?? [];
+  const withNotes = principles.filter((p) => (p.count ?? 0) > 0);
+
+  if (els.principlesSummary) {
+    const totalLinks = principles.reduce((s, p) => s + (p.count ?? 0), 0);
+    els.principlesSummary.textContent = withNotes.length
+      ? `노트 ${data.taggedNotes ?? 0}개 · 원리 등장 ${totalLinks}회`
+      : "";
+  }
+
+  if (!withNotes.length) {
+    els.principlesList.innerHTML = `<div class="principles-empty">아직 모인 횡단 원리가 없어요.<br/>세션을 끝내고 노트를 저장하면, 노트에 달린 원리 태그(대칭·최소작용·엔트로피·정보·창발)가 여기에 레이어를 가로질러 쌓여요.</div>`;
+    return;
+  }
+
+  const html = [];
+  for (const p of withNotes) {
+    html.push(
+      `<div class="principle-group">` +
+        `<div class="principle-head"><span class="principle-emoji">${escapeHtml(p.emoji ?? "")}</span>` +
+        `<span class="principle-label">${escapeHtml(p.label ?? p.key)}</span>` +
+        `<span class="principle-count">${p.count}</span></div>`,
+    );
+    for (const n of p.notes ?? []) {
+      const color = n.domain?.color ?? "var(--accent)";
+      const layer = n.domain
+        ? `${n.domain.emoji ? n.domain.emoji + " " : ""}${displayRepoName(n.domain.name)}`
+        : (n.repo ? displayRepoName(n.repo) : (n.roadmapName ?? ""));
+      const topic = displayRepoName(n.chapter || n.topic || "");
+      const meta = [layer, `d${n.depth}`, n.date].filter(Boolean).join(" · ");
+      const viaBadge =
+        n.via === "mention"
+          ? `<span class="principle-via" title="태그가 아니라 제목·요약에서 언급으로 매칭됨">언급</span>`
+          : "";
+      const inner =
+        `<span class="principle-note-topic">${escapeHtml(topic)}${viaBadge}</span>` +
+        `<span class="principle-note-meta">${escapeHtml(meta)}</span>`;
+      html.push(
+        n.obsidianUri
+          ? `<button class="principle-note" style="border-left-color:${escapeAttr(color)}" data-obsidian="${escapeAttr(n.obsidianUri)}" title="Obsidian에서 노트 열기">${inner}</button>`
+          : `<div class="principle-note" style="border-left-color:${escapeAttr(color)}">${inner}</div>`,
+      );
+    }
+  }
+  els.principlesList.innerHTML = html.join("");
+
+  els.principlesList.querySelectorAll(".principle-note[data-obsidian]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      window.spiralSetup?.openExternal?.(btn.dataset.obsidian);
+    });
+  });
 }
 
 function renderActivity(data) {

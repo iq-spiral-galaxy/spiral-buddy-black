@@ -58,6 +58,7 @@ import {
   groupReposByCategory,
   categorizeLocalRoadmap,
   getOrgCategories,
+  getOrgDomains,
   normalizeRepoName,
   findDomainForCategory,
 } from "./categories.js";
@@ -908,6 +909,167 @@ export function createApi(config: Config) {
     const notes = await listSpiralNotes(config.vaultPath);
     const suggestion = await suggestNext(client, roadmap, chapters, notes);
     return c.json(suggestion);
+  });
+
+  // ─────────────────────────────────────────────────────
+  // 5a-2. 횡단 원리 색인 (Black 전용) — Physis의 핵심 무기.
+  //   모든 노트를 가로질러 5개 횡단 원리(대칭·최소작용·엔트로피·정보·창발)가
+  //   어디서 나타났는지 묶어 보여준다. note-writer가 다는 태그가 1차 신호,
+  //   topic/summary/tags의 특정 키워드가 2차(mention). 본문 전체는 false
+  //   positive가 커서 안 본다.
+  // ─────────────────────────────────────────────────────
+
+  const CROSS_LAYER_PRINCIPLES: {
+    key: string;
+    label: string;
+    emoji: string;
+    tags: string[];
+    keywords: string[];
+  }[] = [
+    {
+      key: "symmetry",
+      label: "대칭",
+      emoji: "🔮",
+      tags: ["symmetry"],
+      keywords: ["대칭", "노에터", "게이지", "symmetr", "noether", "gauge"],
+    },
+    {
+      key: "least-action",
+      label: "최소작용",
+      emoji: "🌀",
+      tags: ["least-action", "least action", "leastaction"],
+      keywords: [
+        "최소작용",
+        "변분",
+        "라그랑주",
+        "해밀턴",
+        "least action",
+        "variational",
+        "lagrang",
+        "hamilton",
+      ],
+    },
+    {
+      key: "entropy",
+      label: "엔트로피·시간",
+      emoji: "🌡️",
+      tags: ["entropy"],
+      keywords: [
+        "엔트로피",
+        "열역학",
+        "비가역",
+        "시간의 화살",
+        "entropy",
+        "thermodynam",
+        "arrow of time",
+      ],
+    },
+    {
+      key: "information",
+      label: "정보",
+      emoji: "📡",
+      tags: ["information"],
+      keywords: [
+        "정보 이론",
+        "정보량",
+        "섀넌",
+        "란다우어",
+        "홀로그래",
+        "shannon",
+        "landauer",
+        "holograph",
+      ],
+    },
+    {
+      key: "emergence",
+      label: "창발",
+      emoji: "✨",
+      tags: ["emergence"],
+      keywords: ["창발", "emergence", "more is different", "상전이"],
+    },
+  ];
+
+  app.get("/principles", async (c) => {
+    if (!config.vaultPath) {
+      return c.json({ error: "No vault configured" }, 400);
+    }
+    const notes = await listSpiralNotes(config.vaultPath);
+
+    // repo → 레이어(도메인) 매핑 (표시·정렬용)
+    const domains = config.curatedOrg
+      ? await getOrgDomains(config.curatedOrg)
+      : null;
+    const domainByRepo = new Map<
+      string,
+      { id: string; name: string; emoji: string; color: string; order: number }
+    >();
+    if (domains) {
+      for (const d of domains) {
+        for (const cat of d.categories) {
+          for (const r of cat.repos) {
+            domainByRepo.set(normalizeRepoName(r), {
+              id: d.id,
+              name: d.name,
+              emoji: d.emoji,
+              color: d.color,
+              order: d.order ?? 99,
+            });
+          }
+        }
+      }
+    }
+
+    const noteHit = new Set<string>(); // 적어도 한 원리에 걸린 노트(중복 제거 카운트)
+    const principles = CROSS_LAYER_PRINCIPLES.map((p) => {
+      const matched: unknown[] = [];
+      for (const n of notes) {
+        const tagHit = (n.tags ?? []).some((t) =>
+          p.tags.includes(t.toLowerCase().trim()),
+        );
+        // 2차 신호는 짧은 고신호 필드(topic/summary/tags)만 — 본문 prose 제외.
+        const hay =
+          `${n.topic ?? ""} ${n.summary ?? ""} ${(n.tags ?? []).join(" ")}`.toLowerCase();
+        const kwHit = !tagHit && p.keywords.some((k) => hay.includes(k));
+        if (!tagHit && !kwHit) continue;
+        const domain = n.repo
+          ? (domainByRepo.get(normalizeRepoName(n.repo)) ?? null)
+          : null;
+        noteHit.add(n.relativePath);
+        matched.push({
+          topic: n.topic,
+          chapter: n.chapter,
+          repo: n.repo,
+          roadmapName: n.roadmapName,
+          depth: n.depth,
+          date: n.date,
+          obsidianUri: obsidianUri(n.relativePath),
+          via: tagHit ? "tag" : "mention",
+          domain,
+        });
+      }
+      // 레이어 order 오름차순 → 같은 레이어 안에선 최신 먼저
+      matched.sort((a, b) => {
+        const ao = (a as { domain?: { order?: number } }).domain?.order ?? 999;
+        const bo = (b as { domain?: { order?: number } }).domain?.order ?? 999;
+        if (ao !== bo) return ao - bo;
+        const ad = (a as { date?: string }).date ?? "";
+        const bd = (b as { date?: string }).date ?? "";
+        return bd.localeCompare(ad);
+      });
+      return {
+        key: p.key,
+        label: p.label,
+        emoji: p.emoji,
+        count: matched.length,
+        notes: matched,
+      };
+    });
+
+    return c.json({
+      totalNotes: notes.length,
+      taggedNotes: noteHit.size,
+      principles,
+    });
   });
 
   // ─────────────────────────────────────────────────────

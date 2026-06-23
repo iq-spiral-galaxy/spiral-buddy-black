@@ -9608,3 +9608,100 @@ body.motion-on .action-btn.quiz[data-quiz-level="4"] {
 }
 body.light-mode .mic-guide { background: #fff; color: #1a2230; }
 body.light-mode .mic-guide kbd { background: #f0f3f6; border-color: #d4dae0; }
+
+/* ───────────────────── 횡단 원리 색인 (Black 전용) ───────────────────── */
+.principles-modal {
+  width: min(680px, 92vw);
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+.principles-summary {
+  font-size: 12px;
+  color: var(--text-dim);
+  padding: 0 2px 10px;
+}
+.principles-list {
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-right: 4px;
+}
+.principles-empty {
+  color: var(--text-dim);
+  font-size: 13px;
+  line-height: 1.7;
+  text-align: center;
+  padding: 28px 12px;
+}
+.principle-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.principle-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  font-size: 14px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.principle-emoji {
+  font-size: 15px;
+}
+.principle-label {
+  color: var(--text);
+}
+.principle-count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-faint);
+  background: var(--bg-elev-2);
+  border-radius: 10px;
+  padding: 1px 8px;
+}
+.principle-note {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  width: 100%;
+  text-align: left;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-soft);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 8px 11px;
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  transition:
+    background 120ms,
+    border-color 120ms;
+}
+button.principle-note:hover {
+  background: var(--bg-elev-2);
+  border-color: var(--border);
+}
+.principle-note-topic {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.principle-note-meta {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.principle-via {
+  font-size: 10px;
+  color: var(--text-faint);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 0 5px;
+}

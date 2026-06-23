@@ -20,11 +20,13 @@
 ## 도메인 커스터마이즈 (완료 — 2026-06-23)
 
 - [x] **SESSION_SYSTEM 프롬프트** (`src/session-store.ts`) — Physis(Sophia, "Derive, don't accept") 페르소나. 제1원리 유도·반증·극한 사냥·환원/창발. `MATH_RENDER_NOTE` export 추가(Red 패턴) → SESSION_SYSTEM + routes의 lookup/chapter-context 프롬프트에 주입.
-- [x] **노트 8섹션 구조** (`src/note-writer.ts` STRUCTURE_SYSTEM + REQUIRED_SECTIONS) — `한 줄 요약 → 핵심 원리(제1원리 유도) → 직관/비유 → 경계/극한(언제 무너지나) → 헷갈렸던 지점 → 창발(그 위에서 나타나는 것) → 이전 연결 → 다음에 볼 것`. 수식 LaTeX 규칙 + cross-layer 태그(symmetry/least-action/entropy/information/emergence). (green의 `extractSectionBody`/`splitRuleItems`는 /rules 엔드포인트 전용이라 미도입 — black엔 해당 기능 없음.)
+- [x] **노트 8섹션 구조** (`src/note-writer.ts` STRUCTURE_SYSTEM + REQUIRED_SECTIONS) — `한 줄 요약 → 핵심 원리(제1원리 유도) → 직관/비유 → 경계/극한(언제 무너지나) → 헷갈렸던 지점 → 창발(그 위에서 나타나는 것) → 이전 연결 → 다음에 볼 것`. 수식 LaTeX 규칙 + cross-layer 태그(symmetry/least-action/entropy/information/emergence) — 이 태그를 **횡단 원리 색인**(아래)이 소비.
 - [x] **KaTeX 채팅 렌더링** (`client/index.html` + `client/app.js`) — Red처럼 채팅에서 `$...$`/`$$...$$` 렌더. black은 esm.sh CDN 패턴이라 `marked-katex-extension@5.1.10` import + `katex@0.16.21` CSS. `nonStandard:true`(한국어 조사 경계) 필수. **노트는 Obsidian MathJax가 별도로 렌더 — 클라이언트 무관.**
 - [x] **아이콘** (`electron/build/icon.svg`+`icon.png`) — 검은 우주 + 흰/은빛 나선으로 리컬러. SVG 그라디언트만 교체(나선 경로 유지) 후 `qlmanage -t -s 1024`로 PNG 재생성(rsvg/magick 없음 → macOS 내장).
 - [x] **data/curated-domains.json** — ⚠️ 실제 파일명은 `curated-domains.json`(레거시명이 `curated-categories.json`). org 키를 `iq-physis-lab`로, iq-physis-lab 7-레이어(0 물리언어 ~ 6 종합) 36 repo 매핑. (이전엔 `iq-dev-lab` 키라 사이드바 그룹핑이 깨져 있었음.)
 - [x] **"Spiral Buddy" 문자열·설치 스크립트** (`main.cjs` 다이얼로그/타이틀 + buildInstallScript DMG/볼륨/.app, `electron-builder.yml` CFBundleDisplayName·shortcutName·publish.repo·dmg.title) — 전부 `Spiral Buddy Black`로. ⚠️ DMG 파일명은 `Spiral.Buddy.Black-<ver>...dmg`로 추정(electron-builder가 공백→점, Blue 실측 기준) — **실제 CI 빌드로 미검증**.
+- [x] **프롬프트 도메인 정합화 + Physis 메서드 심화** (v0.1.5) — Blue 잔재 dev 톤 제거: lookup "deep" 포맷(코드예시→제1원리/극한·경계/직관함정/관련원리), chapter-context(java·메서드 포맷팅→수식 LaTeX), chapter-preview 예시, quiz 4레벨(→제1원리/극한·적용/직관의 함정/횡단·예측). SESSION_SYSTEM에 차원분석 반사·직관함정 명명·반증가능 예측 추가.
+- [x] **🧬 횡단 원리 색인** (v0.1.6, Black 시그니처 기능) — `GET /api/principles`([routes.ts](src/routes.ts)) + 사이드바 버튼/모달([client](client/app.js) `renderPrinciples`). note-writer가 다는 5개 횡단 원리 태그(write-only였음)를 전 노트에서 모아 원리별로 그룹핑(레이어 order 정렬, obsidian 점프). 1차 신호=태그, 2차=topic/summary 키워드(via "언급"). green `/rules` 패턴의 black판.
 
 ## 거버넌스·릴리스 (완료/진행)
 
