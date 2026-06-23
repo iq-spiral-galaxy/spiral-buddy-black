@@ -835,7 +835,10 @@ async function loadRoadmapData() {
       fetch(`/api/history${q}`).then((r) => r.json()),
     ]);
 
-    state.chapters = chaptersRes.chapters ?? [];
+    state.chapters = (chaptersRes.chapters ?? []).map((c) => ({
+      ...c,
+      title: stripEmoji(c.title),
+    }));
     state.history = Array.isArray(historyRes) ? historyRes : [];
 
     renderChapters();
@@ -914,6 +917,18 @@ function updateModelTierBadge() {
 //   "spring-core-deep-dive" → "Spring Core"
 //   1) "-deep-dive" 접미사 제거  2) 하이픈 → 공백
 //   3) v0.5.91 — 모든 단어의 첫 글자 대문자 (Title Case)
+// v0.1.7 — 챕터 제목에 박힌 장식용 이모지 제거. iq-physis-lab 일부 로드맵이
+// 챕터 헤딩 앞에 ⚛️ 같은 이모지를 달아두는데, 사이드바·추천·노트에서 노이즈라
+// 전부 떼낸다. (이모지 + 스킨톤 + VS16 + ZWJ + keycap + 깃발) 제거 후 공백 정리.
+const _EMOJI_RE =
+  /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u{200D}\u{20E3}\u{FE0F}\u{2600}-\u{27BF}\u{1F000}-\u{1FAFF}]/gu;
+function stripEmoji(s) {
+  return String(s ?? "")
+    .replace(_EMOJI_RE, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 function displayRepoName(name) {
   let s = String(name ?? "");
   s = s.replace(/-deep-dive$/i, "");

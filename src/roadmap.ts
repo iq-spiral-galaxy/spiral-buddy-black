@@ -254,6 +254,18 @@ async function loadRoadmapChaptersUncached(
   return chapters;
 }
 
+// v0.1.7 — 챕터 제목에 박힌 장식용 이모지 제거. iq-physis-lab 일부 로드맵이
+// 챕터 헤딩 앞에 ⚛️ 같은 이모지를 달아두는데, 사이드바·노트 제목·버디 컨텍스트
+// 모두에서 노이즈라 소스에서 떼낸다. (id는 파일 경로 기반이라 매칭 영향 없음.)
+const _TITLE_EMOJI_RE =
+  /[\u{1F1E6}-\u{1F1FF}\u{1F3FB}-\u{1F3FF}\u{200D}\u{20E3}\u{FE0F}\u{2600}-\u{27BF}\u{1F000}-\u{1FAFF}]/gu;
+function stripTitleEmoji(s: string): string {
+  return s
+    .replace(_TITLE_EMOJI_RE, "")
+    .replace(/\s{2,}/g, " ")
+    .trim();
+}
+
 async function loadChapterFile(
   abs: string,
   roadmap: Roadmap,
@@ -266,7 +278,7 @@ async function loadChapterFile(
     typeof parsed.data.title === "string" ? parsed.data.title : null;
   const firstHeading = parsed.content.match(/^#\s+(.+)$/m)?.[1]?.trim();
   const fallback = path.basename(abs, ".md");
-  const title = fmTitle ?? firstHeading ?? fallback;
+  const title = stripTitleEmoji(fmTitle ?? firstHeading ?? fallback);
 
   return {
     id: relativeToRoadmap,
