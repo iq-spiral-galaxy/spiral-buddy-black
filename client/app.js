@@ -896,6 +896,9 @@ function updateModelTierBadge() {
 function displayRepoName(name) {
   let s = String(name ?? "");
   s = s.replace(/-deep-dive$/i, "");
+  s = s.replace(/-distilled$/i, "");
+  // v0.1.4 — "ch1-light-speed-mystery" 같은 챕터 접두어 제거 → 주제만 표시("Light Speed Mystery").
+  s = s.replace(/^ch\d+[-_.\s]+/i, "");
   s = s.replace(/-/g, " ");
   return s.replace(/(^|\s)(\S)/g, (_, sp, ch) => sp + ch.toUpperCase());
 }
@@ -1534,7 +1537,7 @@ function roadmapItemHtml(r) {
     r.maxDepth > 0 ? `<span class="depth-pill">d${r.maxDepth}</span>` : "";
   return `
     <button class="roadmap-item ${isActive ? "active" : ""}" data-id="${escapeAttr(r.id)}">
-      <div class="roadmap-item-name">${escapeHtml(r.name)}</div>
+      <div class="roadmap-item-name">${escapeHtml(displayRepoName(r.name))}</div>
       <div class="roadmap-item-meta">
         ${depthBadge}
         <span class="roadmap-item-progress">${r.visitedChapters}/${r.chapterCount}</span>
