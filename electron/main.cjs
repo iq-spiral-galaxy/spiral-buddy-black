@@ -76,7 +76,7 @@ process.on("uncaughtException", (err) => {
     _crashDialogShown = true;
     try {
       dialog.showErrorBox(
-        "Spiral Buddy 오류",
+        "Spiral Buddy Black 오류",
         `예기치 않은 오류가 발생했어요.\n\n${msg.split("\n")[0]}\n\n자세한 내용: ${SERVER_LOG_PATH}`,
       );
     } catch {}
@@ -459,7 +459,7 @@ function createSetupWindow() {
   setupWindow = new BrowserWindow({
     width: 600,
     height: 640,
-    title: "Spiral Buddy — 초기 설정",
+    title: "Spiral Buddy Black — 초기 설정",
     backgroundColor: "#050507",
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: {
@@ -485,7 +485,7 @@ async function createMainWindow() {
     height: 900,
     minWidth: 800,
     minHeight: 600,
-    title: "Spiral Buddy",
+    title: "Spiral Buddy Black",
     backgroundColor: "#050507",
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: {
@@ -511,7 +511,7 @@ async function createMainWindow() {
       buttons: ["취소", "저장 없이 종료"],
       defaultId: 0,
       cancelId: 0,
-      title: "Spiral Buddy",
+      title: "Spiral Buddy Black",
       message: "진행 중인 학습 세션이 있습니다.",
       detail:
         '닫으면 지금까지의 대화가 사라집니다.\n저장하려면 메인 창의 "End & Save"를 먼저 누르세요.',
@@ -545,7 +545,7 @@ async function bootWithConfig(cfg) {
       /* ignore */
     }
     dialog.showErrorBox(
-      "Spiral Buddy — 서버 시작 실패",
+      "Spiral Buddy Black — 서버 시작 실패",
       `서버를 시작할 수 없습니다.\n\n${err?.message ?? err}\n\n로그 파일: ${SERVER_LOG_PATH}`,
     );
     app.quit();
@@ -554,7 +554,7 @@ async function bootWithConfig(cfg) {
   const ready = await waitForServer(serverPort, 8000);
   if (!ready) {
     dialog.showErrorBox(
-      "Spiral Buddy — 서버 시작 실패",
+      "Spiral Buddy Black — 서버 시작 실패",
       `서버가 127.0.0.1:${serverPort}에서 응답하지 않습니다.\n\n로그 파일: ${SERVER_LOG_PATH}`,
     );
     app.quit();
@@ -829,18 +829,18 @@ function buildInstallScript(version, logPath) {
   if (platform === "darwin") {
     const dmgName =
       arch === "arm64"
-        ? `Spiral.Buddy-${version}-arm64.dmg`
-        : `Spiral.Buddy-${version}.dmg`;
+        ? `Spiral.Buddy.Black-${version}-arm64.dmg`
+        : `Spiral.Buddy.Black-${version}.dmg`;
     const url = `https://github.com/${GH_OWNER}/${GH_REPO}/releases/download/v${version}/${dmgName}`;
     // 모든 출력을 logPath로 — 디버깅 가능.
     // set -e는 사용 X (한 단계 실패해도 다음 시도하고 마지막에 open). 단계마다 echo로 진행 로깅.
     return `#!/bin/bash
 exec > "${logPath}" 2>&1
-echo "=== Spiral Buddy update start (v${version}) ==="
+echo "=== Spiral Buddy Black update start (v${version}) ==="
 date
 
 echo "-- step 1: quitting current app"
-osascript -e 'tell application "Spiral Buddy" to quit' 2>/dev/null || true
+osascript -e 'tell application "Spiral Buddy Black" to quit' 2>/dev/null || true
 sleep 2.5
 
 echo "-- step 2: downloading dmg from ${url}"
@@ -857,20 +857,20 @@ if ! hdiutil attach -nobrowse -quiet /tmp/spiral.dmg; then
 fi
 
 echo "-- step 4: replacing app in /Applications"
-rm -rf '/Applications/Spiral Buddy.app'
-if ! cp -R "/Volumes/Spiral Buddy ${version}/Spiral Buddy.app" /Applications/; then
+rm -rf '/Applications/Spiral Buddy Black.app'
+if ! cp -R "/Volumes/Spiral Buddy Black ${version}/Spiral Buddy Black.app" /Applications/; then
   echo "ERROR: copy failed — /Applications 권한이 부족할 수 있음"
-  hdiutil detach -quiet "/Volumes/Spiral Buddy ${version}" 2>/dev/null || true
+  hdiutil detach -quiet "/Volumes/Spiral Buddy Black ${version}" 2>/dev/null || true
   exit 1
 fi
 
 echo "-- step 5: unmount + cleanup"
-hdiutil detach -quiet "/Volumes/Spiral Buddy ${version}" 2>/dev/null || true
-xattr -cr '/Applications/Spiral Buddy.app' 2>/dev/null || true
+hdiutil detach -quiet "/Volumes/Spiral Buddy Black ${version}" 2>/dev/null || true
+xattr -cr '/Applications/Spiral Buddy Black.app' 2>/dev/null || true
 rm -f /tmp/spiral.dmg
 
 echo "-- step 6: opening updated app"
-open '/Applications/Spiral Buddy.app'
+open '/Applications/Spiral Buddy Black.app'
 echo "=== done ==="
 `;
   }
@@ -1485,7 +1485,7 @@ ipcMain.handle("settings:add-workspace", async (event, args) => {
   return { ok: true, workspace: ws };
 });
 
-// ─── iq-dev-lab 38개 레포 자동 다운로드 ──────────────────────
+// ─── iq-physis-lab 36개 레포 자동 다운로드 ──────────────────────
 
 const CURATED_ORG = "iq-physis-lab";
 
@@ -1574,7 +1574,7 @@ function cloneRepo(parentDir, repo, depth = 1) {
 
 ipcMain.handle("setup:pick-parent-dir", async () => {
   const result = await dialog.showOpenDialog({
-    title: "iq-dev-lab을 받을 부모 디렉토리 선택",
+    title: "iq-physis-lab을 받을 부모 디렉토리 선택",
     properties: ["openDirectory", "createDirectory"],
     defaultPath: path.join(os.homedir(), "Documents"),
     buttonLabel: "이 폴더에 받기",
@@ -1900,7 +1900,7 @@ if (!app.requestSingleInstanceLock()) {
         _crashDialogShown = true;
         try {
           dialog.showErrorBox(
-            "Spiral Buddy 시작 실패",
+            "Spiral Buddy Black 시작 실패",
             `앱을 시작하지 못했어요.\n\n${msg.split("\n")[0]}\n\n자세한 내용: ${SERVER_LOG_PATH}`,
           );
         } catch {}

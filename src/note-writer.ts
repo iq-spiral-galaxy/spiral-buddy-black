@@ -11,45 +11,51 @@ Start with ONE tags line (3-6 topical tags, comma-separated, no '#'), then a bla
 
 TAGS: redis-memory, cow-semantics, fork-internals
 
-Then the note body, using this exact structure with these EXACT headings (in this order):
+Then the note body, using this exact structure with these EXACT headings (in this order). The flow is the Physis arc — 원리 → 경계 → 창발 (Principle → Boundary → Emergence):
 
 ## 한 줄 요약
 (2-3 lines max — this section also serves as the note summary)
 
-## 핵심 개념
-(bullet list of the core concepts the learner engaged with this session)
+## 핵심 원리 (제1원리 유도)
+(the principle(s) the session derived, NOT a list of topic names — for each: from which assumption / symmetry / variational principle it follows, and the "왜 이렇게 작동하는가" of the mechanism. Put the key derivation steps and the resulting law here as math.)
 
 ## 직관 / 비유
-(the analogies or mental models that landed for the learner — pulled from the actual conversation)
+(the analogies or mental models that landed for the learner — pulled from the actual conversation. Only metaphors that can be cashed out in the derivation; no "신비로움"에 기댄 설명.)
 
-## 짚고 넘어간 예제
-(concrete examples discussed — code snippets if any, formatted in fenced blocks)
+## 경계 / 극한 (언제 무너지나)
+(the domain of validity drawn this session: the assumptions named explicitly, the limiting cases tested ($v\\to c$, $T\\to 0$, $N\\to\\infty$, $\\hbar\\to 0$, …), and the counterexamples that mark where the law breaks or hands off to a deeper theory)
 
 ## 헷갈렸던 / 확인이 필요한 지점
 (things the learner got wrong, hesitated on, or asked twice — be specific, this is the most valuable section)
+
+## 창발 (그 위에서 나타나는 것)
+(what genuinely new behavior appears one level up that the microscopic law never names — "More is Different". Include cross-layer principles if one reappeared this session: symmetry / least action / entropy & arrow of time / information / emergence.)
 
 ## 이전 학습과의 연결
 (how this builds on or connects to prior spiral-buddy notes — reference them as [[note-title]] if relevant)
 
 ## 다음에 볼 것
-(specific, actionable next steps — what to revisit, what to push deeper, what blocks this unblocks)
+(specific, actionable next steps — what to revisit, what to push deeper, what derivation or boundary to attack next)
 
 Rules:
 - Output everything as real markdown directly — NEVER as a JSON string, never escaped, never wrapped in fences. Code examples go in normal triple-backtick fenced blocks inside the relevant section.
 - Write in the SAME LANGUAGE as the conversation (likely Korean).
 - Be ruthlessly concrete. Quote the learner's own framings when possible.
 - Don't fabricate content that wasn't in the conversation.
+- Math notation: keep formulas in LaTeX with $...$ (inline) / $$...$$ (display) — Obsidian renders these natively. Never wrap math in backticks; convert any unicode math (x², σ², ℏ, ∇, ∂) from the conversation into proper LaTeX. The key derivations and the resulting laws from the session belong in the note as display math.
 - If a section has nothing real to put in it, write a single italicized line like "_이번 세션에서 다루지 않음._".
-- Tags should reflect topic, not meta ("redis-memory", "cow-semantics", not "learning", "study").
-- The "## 한 줄 요약" section doubles as the note summary. Do NOT start it with the chapter number (write "Fixtures & SetUp 첫 스파이럴…" not "05. Fixtures & SetUp 첫 스파이럴…"). The chapter title is recorded separately.`;
+- Tags should reflect topic, not meta ("noether-theorem", "phase-transition", "hawking-radiation", not "physics", "study").
+- If the session substantially engaged one of the recurring cross-layer principles, ALSO include it as a tag: "symmetry", "least-action", "entropy", "information", "emergence". These power cross-layer recall in later sessions.
+- The "## 한 줄 요약" section doubles as the note summary. Do NOT start it with the chapter number (write "최소작용 원리 첫 스파이럴…" not "01. 최소작용 원리 첫 스파이럴…"). The chapter title is recorded separately.`;
 
 /** 8섹션 헤딩 — save_note 검증/보충 시 사용 */
 export const REQUIRED_SECTIONS = [
   "한 줄 요약",
-  "핵심 개념",
+  "핵심 원리 (제1원리 유도)",
   "직관 / 비유",
-  "짚고 넘어간 예제",
+  "경계 / 극한 (언제 무너지나)",
   "헷갈렸던 / 확인이 필요한 지점",
+  "창발 (그 위에서 나타나는 것)",
   "이전 학습과의 연결",
   "다음에 볼 것",
 ] as const;

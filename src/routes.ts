@@ -36,6 +36,7 @@ import { suggestNext } from "./spiral.js";
 import { generateNote, parseTranscriptSection } from "./note-writer.js";
 import {
   SESSION_SYSTEM,
+  MATH_RENDER_NOTE,
   buildInitialContext,
   buildInitialContextBlocks,
   CHAPTER_CONTENT_MAX,
@@ -961,7 +962,10 @@ export function createApi(config: Config) {
       ? `**현재 학습 맥락 (참고용)**:\n${body.context.slice(0, 800)}\n\n---\n\n**찾아보려는 표현**:\n\`\`\`\n${body.query}\n\`\`\`${questionBlock}`
       : `**찾아보려는 표현**:\n\`\`\`\n${body.query}\n\`\`\`${questionBlock}`;
 
-    const systemPrompt = systemByDepth[depth] ?? systemByDepth.medium ?? "";
+    const systemPrompt =
+      (systemByDepth[depth] ?? systemByDepth.medium ?? "") +
+      "\n\n" +
+      MATH_RENDER_NOTE;
     const maxTokens = maxTokensByDepth[depth] ?? 700;
 
     return streamText(c, async (stream) => {
@@ -1072,7 +1076,8 @@ export function createApi(config: Config) {
       "- '본문 인용' 안의 자연어 문장은 따옴표(\"...\")로 감쌀 수 있지만, 코드는 " +
       "  반드시 코드 표기. 자연어와 코드가 섞이면 자연어는 blockquote 일반 텍스트, " +
       "  코드는 펜스/백틱으로 시각 분리.\n" +
-      "- 짧게. 전체 300-450자 정도(코드 펜스 제외). 한국어. 마크다운 사용 가능.";
+      "- 짧게. 전체 300-450자 정도(코드 펜스 제외). 한국어. 마크다운 사용 가능.\n\n" +
+      MATH_RENDER_NOTE;
 
     const selectionBlock = body.selectionText?.trim()
       ? `\n\n**사용자가 특히 궁금해 하는 부분 (Buddy 메시지에서 드래그)**:\n> ${body.selectionText.trim().slice(0, 400)}`

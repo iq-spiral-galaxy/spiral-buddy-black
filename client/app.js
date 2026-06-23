@@ -3,6 +3,7 @@
 
 import { marked } from "https://esm.sh/marked@13.0.3";
 import { markedHighlight } from "https://esm.sh/marked-highlight@2.2.1";
+import markedKatex from "https://esm.sh/marked-katex-extension@5.1.10";
 import hljs from "https://esm.sh/highlight.js@11.10.0";
 import DOMPurify from "https://esm.sh/dompurify@3.1.6";
 
@@ -18,6 +19,17 @@ marked.use(
       return hljs.highlight(code, { language, ignoreIllegals: true }).value;
     },
   }),
+);
+// v0.1.0 (Black) — 수식 렌더링 (KaTeX). marked 토크나이저 레벨에서
+// $...$ / $$...$$를 집어가므로 수식 안 언더스코어($x_1$)가 <em>으로 깨지지
+// 않고, 코드 스팬/펜스 안의 $는 건드리지 않는다.
+// - nonStandard: 한국어 조사가 $ 바로 뒤에 붙는다("$\hbar$는") — 표준 모드는
+//   공백 경계를 요구해 그런 수식을 통째로 놓치므로 필수.
+// - output:"html": MathML 출력 생략 — DOMPurify가 <annotation> 등을 걷어내는
+//   것과의 상호작용을 원천 차단(시각 출력은 동일).
+// index.html의 katex.min.css(폰트/레이아웃)와 세트.
+marked.use(
+  markedKatex({ throwOnError: false, nonStandard: true, output: "html" }),
 );
 marked.setOptions({ breaks: true, gfm: true });
 
@@ -159,8 +171,12 @@ function displayWorkspaceName(workspace) {
     .filter(Boolean)
     .pop()
     ?.toLowerCase();
-  if (normalized === "iq-dev-lab" || rootBase === "iq-dev-lab") {
-    return "IQ Dev Lab";
+  // iq-<x>-lab 형태의 워크스페이스명/루트는 "IQ X Lab"로 예쁘게 (색 무관).
+  const labMatch =
+    normalized.match(/^iq-(.+)-lab$/) || rootBase?.match(/^iq-(.+)-lab$/);
+  if (labMatch) {
+    const seg = labMatch[1];
+    return `IQ ${seg.charAt(0).toUpperCase()}${seg.slice(1)} Lab`;
   }
   return rawName || "Workspace";
 }
@@ -3165,11 +3181,11 @@ async function runCuratedInstall(repoNames, label) {
     if (!matches && window.spiralSettings) {
       if (
         confirm(
-          `iq-dev-lab을 워크스페이스로 등록할까요?\n${targetDir}\n(이미 등록되어 있다면 패스하세요)`,
+          `${_curatedState.data?.org ?? "이 학습 자료"}를 워크스페이스로 등록할까요?\n${targetDir}\n(이미 등록되어 있다면 패스하세요)`,
         )
       ) {
         const wsRes = await window.spiralSettings.addWorkspace({
-          name: "iq-dev-lab",
+          name: _curatedState.data?.org ?? "curated",
           sourceKind: "dir",
           localPath: targetDir,
         });
