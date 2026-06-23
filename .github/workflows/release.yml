@@ -17,6 +17,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     # 정상 빌드는 1-3분. 7분 초과는 거의 hang이므로 자동 cancel.
     timeout-minutes: 15
+    env:
+      # pnpm 11은 .npmrc의 node-linker=hoisted를 무시(symlinked가 됨 → electron-builder가
+      # transitive deps를 직접 의존성 ~10개만 복사). 모든 pnpm 명령(install·exec)에 일관되게
+      # 적용되도록 env로 강제 — install에만 --config로 주면 다음 `pnpm exec`가 config 불일치로
+      # 재링크하다 빌드게이트(ERR_PNPM_IGNORED_BUILDS)에 다시 막힌다(clean-room 확인).
+      PNPM_CONFIG_NODE_LINKER: hoisted
     strategy:
       fail-fast: false
       matrix:
@@ -62,14 +68,11 @@ jobs:
           restore-keys: ${{ runner.os }}-electron-
 
       - name: Install dependencies
-        # pnpm 11은 .npmrc/package.json/pnpm-workspace.yaml 설정을 일부 무시한다(clean-room 확인):
-        #  1) onlyBuiltDependencies → electron/esbuild postinstall 차단 → ERR_PNPM_IGNORED_BUILDS로
-        #     install exit 1, electron 바이너리 미설치. → dangerouslyAllowAllBuilds로 허용.
-        #  2) node-linker=hoisted → 무시되어 symlinked 레이아웃이 됨 → electron-builder가 transitive
-        #     deps(minimatch 등)를 누락해 런타임 "Cannot find package 'minimatch'" 크래시.
-        #     → --config.node-linker=hoisted로 강제(npm식 평탄화, Blue가 쓰던 known-good 구조).
-        # 둘 다 frozen-lockfile로 고정된 신뢰 트리에서만 적용.
-        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true --config.node-linker=hoisted
+        # pnpm 11은 onlyBuiltDependencies 화이트리스트(.npmrc/package.json)를 무시해
+        # electron/esbuild postinstall을 막음 → ERR_PNPM_IGNORED_BUILDS로 exit 1(electron
+        # 바이너리 미설치). frozen-lockfile로 고정된 신뢰 트리이므로 빌드 스크립트 허용.
+        # (node-linker=hoisted는 job env로 강제 — 위 env 주석 참고.)
+        run: pnpm install --frozen-lockfile --config.dangerouslyAllowAllBuilds=true
 
       # Linux: AppImage 빌드에 libfuse2 필요. Ubuntu 24.04+에서는 기본 미포함이라
       # electron-builder가 sandbox/fuse 관련 setup에서 멈추는 케이스가 잦음.
