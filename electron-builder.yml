@@ -12,6 +12,12 @@ afterPack: ./electron/after-pack.cjs
 # unpack 처리 신경 안 써도 됨. 사이즈 약간 늘지만 안정성 우선.
 asar: false
 
+# v0.1.2 — 패키지 내부 중첩 node_modules도 포함. pnpm은 버전 충돌 시 의존성을
+# <pkg>/node_modules/<dep>로 중첩시키는데(예: glob@11 → glob/node_modules/minimatch@10,
+# top-level minimatch는 다른 버전), 기본값(false)이면 그 중첩이 빠져 런타임
+# "Cannot find package 'minimatch'" 크래시. true로 중첩까지 복사. (node-linker=hoisted와 세트)
+includeSubNodeModules: true
+
 directories:
   output: release
   buildResources: electron/build
