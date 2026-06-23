@@ -1,6 +1,8 @@
 # Claude Code Context — spiral-buddy-black 🌑
 
-**우주(Physis) 버디.** Spiral Buddy 패밀리의 4번째. Blue(v0.5.107)에서 clone해 분기. 정체성·색·도메인 배선 + **도메인 커스터마이즈(프롬프트·노트 구조·아이콘·카테고리·KaTeX) 완료, 거버넌스·CI 정리, 첫 릴리스 [v0.1.0](https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/tag/v0.1.0) published** (2026-06-23, 3 OS 빌드 성공).
+**우주(Physis) 버디.** Spiral Buddy 패밀리의 4번째. Blue(v0.5.107)에서 clone해 분기. 정체성·색·도메인 배선 + **도메인 커스터마이즈(프롬프트·노트 구조·아이콘·카테고리·KaTeX) 완료, 거버넌스·CI 정리, setup wizard physis화, 릴리스 [v0.1.2](https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest) published** (2026-06-23, 3 OS 빌드 성공·DMG 검증).
+
+> ⚠️ **CI/패키징 함정 2종**(pnpm 11 ↔ electron-builder, 패밀리 공통) — release.yml `env: PNPM_CONFIG_NODE_LINKER: hoisted` + install `--config.dangerouslyAllowAllBuilds=true` + electron-builder.yml `includeSubNodeModules: true`. 빼면 install 실패 또는 런타임 `Cannot find package 'minimatch'` 크래시. 상세·검증법은 메모리 [[rgb-multirepo-port-gotchas]] 함정 5·6.
 
 ## 정체성 (적용 완료)
 
