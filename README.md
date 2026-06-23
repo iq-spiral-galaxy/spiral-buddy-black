@@ -14,7 +14,67 @@
 
 ---
 
-> 🚧 **준비 중 (WIP)** — Blue 엔진(v0.5.107)에서 분기한 초기 스캐폴드입니다. 정식 빌드와 한 줄 설치(macOS/Windows/Linux)는 도메인 콘텐츠·아이콘 정리 후 추가됩니다. 지금은 아래처럼 **소스에서 직접 실행**할 수 있어요.
+> 🚧 **준비 중 (WIP)** — Blue 엔진(v0.5.107)에서 분기한 초기 스캐폴드입니다. 정식 빌드는 도메인 콘텐츠·아이콘 정리 후 출시됩니다. 지금은 **소스에서 직접 실행**할 수 있고(아래 "소스에서 실행"), 한 줄 설치 명령도 미리 넣어뒀어요(첫 릴리스 후 동작).
+
+<details>
+<summary>⚡ <b>30초 설치 — 한 줄 명령으로 바로 받기</b> &nbsp;(클릭해서 펼치기 · 첫 릴리스 후 동작)</summary>
+
+<br/>
+
+> 🚧 아직 정식 릴리스 전이라 아래 URL은 첫 출시 후 동작합니다. (자산 파일명은 릴리스 때 최종 확정)
+
+**🍎 macOS — Apple Silicon (M1/M2/M3/M4)**
+
+```bash
+osascript -e 'tell application "Spiral Buddy Black" to quit' 2>/dev/null; sleep 1; \
+cd /tmp && \
+curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest-arm64.dmg" && \
+MOUNT=$(hdiutil attach -nobrowse /tmp/spiral.dmg | grep -o '/Volumes/.*' | head -1) && \
+rm -rf '/Applications/Spiral Buddy Black.app' && \
+cp -R "$MOUNT/Spiral Buddy Black.app" /Applications/ && \
+hdiutil detach -quiet "$MOUNT" && \
+xattr -cr '/Applications/Spiral Buddy Black.app' && \
+rm -f /tmp/spiral.dmg && \
+open '/Applications/Spiral Buddy Black.app'
+```
+
+**🍎 macOS — Intel**
+
+```bash
+osascript -e 'tell application "Spiral Buddy Black" to quit' 2>/dev/null; sleep 1; \
+cd /tmp && \
+curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest.dmg" && \
+MOUNT=$(hdiutil attach -nobrowse /tmp/spiral.dmg | grep -o '/Volumes/.*' | head -1) && \
+rm -rf '/Applications/Spiral Buddy Black.app' && \
+cp -R "$MOUNT/Spiral Buddy Black.app" /Applications/ && \
+hdiutil detach -quiet "$MOUNT" && \
+xattr -cr '/Applications/Spiral Buddy Black.app' && \
+rm -f /tmp/spiral.dmg && \
+open '/Applications/Spiral Buddy Black.app'
+```
+
+**🪟 Windows (PowerShell)**
+
+```powershell
+$ErrorActionPreference = "Stop"
+Get-Process "Spiral Buddy Black" -EA SilentlyContinue | Stop-Process -Force
+$exe = "$env:TEMP\spiral-buddy-black-setup.exe"
+Invoke-WebRequest -Uri "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest-Setup.exe" -OutFile $exe
+Start-Process -FilePath $exe -ArgumentList "/S" -Wait
+Remove-Item $exe -Force
+$app = "$env:LOCALAPPDATA\Programs\spiral-buddy-black\Spiral Buddy Black.exe"
+if (Test-Path $app) { Start-Process $app }
+```
+
+**🐧 Linux**
+
+```bash
+curl -fL -o ~/SpiralBuddyBlack.AppImage "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest.AppImage"
+chmod +x ~/SpiralBuddyBlack.AppImage
+~/SpiralBuddyBlack.AppImage
+```
+
+</details>
 
 ## 🌌 무엇을 배우나 — IQ Physis Lab (Sophia)
 
