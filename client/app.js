@@ -260,6 +260,7 @@ function cacheEls() {
   els.principlesModal = $("principles-modal");
   els.principlesModalClose = $("principles-modal-close");
   els.principlesSummary = $("principles-summary");
+  els.principlesSearch = $("principles-search");
   els.principlesList = $("principles-list");
   // settings / workspace
   els.settingsBtn = $("settings-btn");
@@ -655,6 +656,12 @@ function wireEvents() {
   if (els.principlesModal) {
     els.principlesModal.addEventListener("click", (e) => {
       if (e.target === els.principlesModal) closePrinciplesModal();
+    });
+  }
+  if (els.principlesSearch) {
+    els.principlesSearch.addEventListener("input", (e) => {
+      _principlesQuery = e.target.value;
+      if (_principlesData) renderPrinciples(_principlesData, _principlesQuery);
     });
   }
 
@@ -4488,14 +4495,14 @@ function closeActivityModal() {
 // 보여준다. Physis의 "핵심 무기" = 나선 학습의 연결조직 가시화.
 
 let _principlesData = null;
+let _principlesQuery = "";
 
 async function refreshPrinciplesCount() {
   if (!els.principlesCount) return;
   try {
     const data = await fetch("/api/principles").then((r) => r.json());
     _principlesData = data;
-    const n = data?.taggedNotes ?? 0;
-    els.principlesCount.textContent = String(n);
+    els.principlesCount.textContent = String(data?.taggedNotes ?? 0);
   } catch {
     els.principlesCount.textContent = "—";
   }
@@ -4505,6 +4512,8 @@ async function openPrinciplesModal() {
   if (!els.principlesModal) return;
   els.principlesModal.classList.remove("hidden");
   els.principlesModal.setAttribute("aria-hidden", "false");
+  _principlesQuery = "";
+  if (els.principlesSearch) els.principlesSearch.value = "";
   els.principlesList.innerHTML = `<div class="principles-empty">loading…</div>`;
   els.principlesSummary.textContent = "";
   try {
@@ -4513,7 +4522,8 @@ async function openPrinciplesModal() {
     if (els.principlesCount) {
       els.principlesCount.textContent = String(data?.taggedNotes ?? 0);
     }
-    renderPrinciples(data);
+    renderPrinciples(data, "");
+    els.principlesSearch?.focus();
   } catch (err) {
     els.principlesList.innerHTML = `<div class="principles-empty">로드 실패: ${escapeHtml(err.message)}</div>`;
   }
@@ -4525,45 +4535,90 @@ function closePrinciplesModal() {
   els.principlesModal.setAttribute("aria-hidden", "true");
 }
 
-function renderPrinciples(data) {
+// 원리의 6층 종합 레포(synthRepo)에 해당하는 *설치된* 로드맵 찾기 (없으면 null).
+function _findSynthRoadmap(synthRepo) {
+  if (!synthRepo) return null;
+  const t = String(synthRepo).toLowerCase();
+  return (
+    (state.roadmaps ?? []).find((r) => {
+      const repo = String(r.hierarchy?.repo ?? r.repo ?? "").toLowerCase();
+      const id = String(r.id ?? "").toLowerCase();
+      return repo === t || id === t || id.split("/")[0] === t;
+    }) ?? null
+  );
+}
+
+function renderPrinciples(data, query) {
   if (!els.principlesList) return;
+  const q = (query ?? "").trim().toLowerCase();
   const principles = data?.principles ?? [];
-  const withNotes = principles.filter((p) => (p.count ?? 0) > 0);
+
+  // 검색 필터 — 노트 단위(주제·레이어·메타·창발 스니펫·원리명)
+  let shownNotes = 0;
+  const groups = [];
+  for (const p of principles) {
+    const notes = (p.notes ?? []).filter((n) => {
+      if (!q) return true;
+      const hay =
+        `${n.topic ?? ""} ${n.chapter ?? ""} ${n.repo ?? ""} ${n.roadmapName ?? ""} ${n.domain?.name ?? ""} ${n.emergence ?? ""} ${p.label ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+    if (!notes.length) continue;
+    shownNotes += notes.length;
+    groups.push({ p, notes });
+  }
 
   if (els.principlesSummary) {
     const totalLinks = principles.reduce((s, p) => s + (p.count ?? 0), 0);
-    els.principlesSummary.textContent = withNotes.length
-      ? `노트 ${data.taggedNotes ?? 0}개 · 원리 등장 ${totalLinks}회`
-      : "";
+    els.principlesSummary.textContent = q
+      ? `매칭 ${shownNotes}개`
+      : groups.length
+        ? `노트 ${data.taggedNotes ?? 0}개 · 원리 등장 ${totalLinks}회`
+        : "";
   }
 
-  if (!withNotes.length) {
-    els.principlesList.innerHTML = `<div class="principles-empty">아직 모인 횡단 원리가 없어요.<br/>세션을 끝내고 노트를 저장하면, 노트에 달린 원리 태그(대칭·최소작용·엔트로피·정보·창발)가 여기에 레이어를 가로질러 쌓여요.</div>`;
+  if (!groups.length) {
+    els.principlesList.innerHTML = q
+      ? `<div class="principles-empty">"${escapeHtml(query)}"에 매칭되는 노트가 없어요.</div>`
+      : `<div class="principles-empty">아직 모인 횡단 원리가 없어요.<br/>세션을 끝내고 노트를 저장하면, 노트에 달린 원리 태그(대칭·최소작용·엔트로피·정보·창발)가 여기에 레이어를 가로질러 쌓여요.</div>`;
     return;
   }
 
   const html = [];
-  for (const p of withNotes) {
+  for (const { p, notes } of groups) {
+    // 6층 종합 레포로의 다리 — 설치돼 있으면 전환 버튼, 아니면 미설치 안내.
+    const synth = _findSynthRoadmap(p.synthRepo);
+    const bridge = synth
+      ? `<button class="principle-synth" data-synth-id="${escapeAttr(synth.id)}" title="${escapeAttr(displayRepoName(p.synthRepo))} 로드맵으로 이동">이 원리로 종합 학습 →</button>`
+      : p.synthRepo
+        ? `<span class="principle-synth-missing" title="${escapeAttr(displayRepoName(p.synthRepo))} 종합 레포가 아직 설치되지 않았어요 (설정에서 받기)">종합 레포 미설치</span>`
+        : "";
     html.push(
       `<div class="principle-group">` +
         `<div class="principle-head"><span class="principle-emoji">${escapeHtml(p.emoji ?? "")}</span>` +
         `<span class="principle-label">${escapeHtml(p.label ?? p.key)}</span>` +
-        `<span class="principle-count">${p.count}</span></div>`,
+        `<span class="principle-count">${notes.length}</span>${bridge}</div>`,
     );
-    for (const n of p.notes ?? []) {
+    for (const n of notes) {
       const color = n.domain?.color ?? "var(--accent)";
       const layer = n.domain
         ? `${n.domain.emoji ? n.domain.emoji + " " : ""}${displayRepoName(n.domain.name)}`
-        : (n.repo ? displayRepoName(n.repo) : (n.roadmapName ?? ""));
+        : n.repo
+          ? displayRepoName(n.repo)
+          : (n.roadmapName ?? "");
       const topic = displayRepoName(n.chapter || n.topic || "");
       const meta = [layer, `d${n.depth}`, n.date].filter(Boolean).join(" · ");
       const viaBadge =
         n.via === "mention"
           ? `<span class="principle-via" title="태그가 아니라 제목·요약에서 언급으로 매칭됨">언급</span>`
           : "";
+      const snippet = n.emergence
+        ? `<span class="principle-note-snippet">${escapeHtml(n.emergence)}</span>`
+        : "";
       const inner =
         `<span class="principle-note-topic">${escapeHtml(topic)}${viaBadge}</span>` +
-        `<span class="principle-note-meta">${escapeHtml(meta)}</span>`;
+        `<span class="principle-note-meta">${escapeHtml(meta)}</span>` +
+        snippet;
       html.push(
         n.obsidianUri
           ? `<button class="principle-note" style="border-left-color:${escapeAttr(color)}" data-obsidian="${escapeAttr(n.obsidianUri)}" title="Obsidian에서 노트 열기">${inner}</button>`
@@ -4573,11 +4628,22 @@ function renderPrinciples(data) {
   }
   els.principlesList.innerHTML = html.join("");
 
-  els.principlesList.querySelectorAll(".principle-note[data-obsidian]").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      window.spiralSetup?.openExternal?.(btn.dataset.obsidian);
+  els.principlesList
+    .querySelectorAll(".principle-note[data-obsidian]")
+    .forEach((btn) => {
+      btn.addEventListener("click", () =>
+        window.spiralSetup?.openExternal?.(btn.dataset.obsidian),
+      );
     });
-  });
+  els.principlesList
+    .querySelectorAll(".principle-synth[data-synth-id]")
+    .forEach((btn) => {
+      btn.addEventListener("click", async (e) => {
+        e.stopPropagation();
+        closePrinciplesModal();
+        await switchRoadmap(btn.dataset.synthId);
+      });
+    });
 }
 
 function renderActivity(data) {

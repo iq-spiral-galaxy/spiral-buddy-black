@@ -26,7 +26,7 @@
 - [x] **data/curated-domains.json** — ⚠️ 실제 파일명은 `curated-domains.json`(레거시명이 `curated-categories.json`). org 키를 `iq-physis-lab`로, iq-physis-lab 7-레이어(0 물리언어 ~ 6 종합) 36 repo 매핑. (이전엔 `iq-dev-lab` 키라 사이드바 그룹핑이 깨져 있었음.)
 - [x] **"Spiral Buddy" 문자열·설치 스크립트** (`main.cjs` 다이얼로그/타이틀 + buildInstallScript DMG/볼륨/.app, `electron-builder.yml` CFBundleDisplayName·shortcutName·publish.repo·dmg.title) — 전부 `Spiral Buddy Black`로. ⚠️ DMG 파일명은 `Spiral.Buddy.Black-<ver>...dmg`로 추정(electron-builder가 공백→점, Blue 실측 기준) — **실제 CI 빌드로 미검증**.
 - [x] **프롬프트 도메인 정합화 + Physis 메서드 심화** (v0.1.5) — Blue 잔재 dev 톤 제거: lookup "deep" 포맷(코드예시→제1원리/극한·경계/직관함정/관련원리), chapter-context(java·메서드 포맷팅→수식 LaTeX), chapter-preview 예시, quiz 4레벨(→제1원리/극한·적용/직관의 함정/횡단·예측). SESSION_SYSTEM에 차원분석 반사·직관함정 명명·반증가능 예측 추가.
-- [x] **🧬 횡단 원리 색인** (v0.1.6, Black 시그니처 기능) — `GET /api/principles`([routes.ts](src/routes.ts)) + 사이드바 버튼/모달([client](client/app.js) `renderPrinciples`). note-writer가 다는 5개 횡단 원리 태그(write-only였음)를 전 노트에서 모아 원리별로 그룹핑(레이어 order 정렬, obsidian 점프). 1차 신호=태그, 2차=topic/summary 키워드(via "언급"). green `/rules` 패턴의 black판.
+- [x] **🧬 횡단 원리 색인** (v0.1.6, Black 시그니처 기능) — `GET /api/principles`([routes.ts](src/routes.ts)) + 사이드바 버튼/모달([client](client/app.js) `renderPrinciples`). note-writer가 다는 5개 횡단 원리 태그(write-only였음)를 전 노트에서 모아 원리별로 그룹핑(레이어 order 정렬, obsidian 점프). 1차 신호=태그, 2차=topic/summary 키워드(via "언급"). green `/rules` 패턴의 black판. **v0.1.10 루프화**: 각 원리→6층 종합 레포 1:1 다리("이 원리로 종합 학습 →" = 설치 시 `switchRoadmap`), 노트별 `## 창발` 스니펫 인라인, 모달 내 검색.
 
 ## 거버넌스·릴리스 (완료/진행)
 

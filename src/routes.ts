@@ -919,12 +919,15 @@ export function createApi(config: Config) {
   //   positive가 커서 안 본다.
   // ─────────────────────────────────────────────────────
 
+  // 각 원리는 6층 종합 레포(synthRepo)와 1:1로 매핑된다 — 색인에서 "이 원리로
+  // 종합 학습 시작" 다리로 연결(설치돼 있으면 그 로드맵으로 전환).
   const CROSS_LAYER_PRINCIPLES: {
     key: string;
     label: string;
     emoji: string;
     tags: string[];
     keywords: string[];
+    synthRepo: string;
   }[] = [
     {
       key: "symmetry",
@@ -932,6 +935,7 @@ export function createApi(config: Config) {
       emoji: "🔮",
       tags: ["symmetry"],
       keywords: ["대칭", "노에터", "게이지", "symmetr", "noether", "gauge"],
+      synthRepo: "symmetry-everywhere",
     },
     {
       key: "least-action",
@@ -948,6 +952,7 @@ export function createApi(config: Config) {
         "lagrang",
         "hamilton",
       ],
+      synthRepo: "least-action-everywhere",
     },
     {
       key: "entropy",
@@ -963,6 +968,7 @@ export function createApi(config: Config) {
         "thermodynam",
         "arrow of time",
       ],
+      synthRepo: "entropy-time-everywhere",
     },
     {
       key: "information",
@@ -979,6 +985,7 @@ export function createApi(config: Config) {
         "landauer",
         "holograph",
       ],
+      synthRepo: "information-everywhere",
     },
     {
       key: "emergence",
@@ -986,8 +993,29 @@ export function createApi(config: Config) {
       emoji: "✨",
       tags: ["emergence"],
       keywords: ["창발", "emergence", "more is different", "상전이"],
+      synthRepo: "emergence-distilled",
     },
   ];
+
+  // 노트 body에서 "## <heading>" 섹션 본문을 한 줄로 추출(스니펫용). 없거나
+  // placeholder(_…다루지 않음._)뿐이면 "".
+  const extractSectionSnippet = (body: string, heading: string): string => {
+    const lines = (body ?? "").split("\n");
+    const start = lines.findIndex(
+      (l) => l.match(/^##\s+(.+?)\s*$/)?.[1]?.trim() === heading,
+    );
+    if (start === -1) return "";
+    const rest = lines.slice(start + 1);
+    const end = rest.findIndex((l) => /^##\s+/.test(l));
+    const text = (end === -1 ? rest : rest.slice(0, end))
+      .join(" ")
+      .replace(/^[-*]\s+/gm, "")
+      .replace(/[`*_>#]/g, "")
+      .replace(/\s+/g, " ")
+      .trim();
+    if (!text || /^_[^_]*다루지 않음[^_]*_?$/.test(text)) return "";
+    return text.length > 140 ? text.slice(0, 140) + "…" : text;
+  };
 
   app.get("/principles", async (c) => {
     if (!config.vaultPath) {
@@ -1044,6 +1072,8 @@ export function createApi(config: Config) {
           date: n.date,
           obsidianUri: obsidianUri(n.relativePath),
           via: tagHit ? "tag" : "mention",
+          // 왜 이 원리가 여기서 나타났는지 — 노트의 창발 섹션 한 줄.
+          emergence: extractSectionSnippet(n.body, "창발 (그 위에서 나타나는 것)"),
           domain,
         });
       }
@@ -1060,6 +1090,7 @@ export function createApi(config: Config) {
         key: p.key,
         label: p.label,
         emoji: p.emoji,
+        synthRepo: p.synthRepo,
         count: matched.length,
         notes: matched,
       };
