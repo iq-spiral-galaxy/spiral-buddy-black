@@ -32,6 +32,8 @@ const APP_ROOT = app.getAppPath();
 const CONFIG_PATH = path.join(app.getPath("userData"), "spiral-buddy-config.json");
 const LOG_DIR = app.getPath("logs"); // macOS: ~/Library/Logs/<productName>
 const SERVER_LOG_PATH = path.join(LOG_DIR, "server.log");
+// curated 레포 org (config/setup 기본값 + git-workspace 감지). refactor(6b) hoist.
+const CURATED_ORG = "iq-physis-lab";
 
 let mainWindow = null;
 let setupWindow = null;
@@ -183,7 +185,7 @@ function migrateConfig(raw) {
     roadmapRoot: raw.roadmapRoot ?? null,
     vaultSubDir: "spiral-buddy",
     source: "legacy",
-    categoriesOrg: raw.curatedOrg ?? "iq-physis-lab",
+    categoriesOrg: raw.curatedOrg ?? CURATED_ORG,
   };
   return ensureSonnetDefault({
     anthropicApiKey: raw.anthropicApiKey,
@@ -192,7 +194,7 @@ function migrateConfig(raw) {
     model: raw.model,
     maxTokens: raw.maxTokens,
     githubToken: raw.githubToken,
-    curatedOrg: raw.curatedOrg ?? "iq-physis-lab",
+    curatedOrg: raw.curatedOrg ?? CURATED_ORG,
     activeWorkspaceId: ws.id,
     workspaces: [ws],
   });
@@ -630,7 +632,7 @@ ipcMain.handle("setup:validate-and-save", async (_e, input) => {
     model: input.model ?? null,
     maxTokens: input.maxTokens ?? null,
     githubToken: input.githubToken ?? null,
-    curatedOrg: "iq-physis-lab",
+    curatedOrg: CURATED_ORG,
     activeWorkspaceId: "default",
     workspaces: [
       {
@@ -639,7 +641,7 @@ ipcMain.handle("setup:validate-and-save", async (_e, input) => {
         roadmapRoot: input.roadmapRoot ?? null,
         vaultSubDir: "spiral-buddy",
         source: input.source ?? "setup",
-        categoriesOrg: "iq-physis-lab",
+        categoriesOrg: CURATED_ORG,
       },
     ],
   };
@@ -1475,8 +1477,8 @@ ipcMain.handle("settings:add-workspace", async (event, args) => {
     sourceUrl: args.gitUrl ?? null,
     // iq-dev-lab 카테고리는 자동 적용. 다른 레포면 카테고리 없음.
     categoriesOrg:
-      args.gitUrl?.includes("iq-physis-lab") || roadmapRoot.includes("iq-physis-lab")
-        ? "iq-physis-lab"
+      args.gitUrl?.includes(CURATED_ORG) || roadmapRoot.includes(CURATED_ORG)
+        ? CURATED_ORG
         : null,
   };
   cfg.workspaces.push(ws);
@@ -1486,8 +1488,7 @@ ipcMain.handle("settings:add-workspace", async (event, args) => {
 });
 
 // ─── iq-physis-lab 36개 레포 자동 다운로드 ──────────────────────
-
-const CURATED_ORG = "iq-physis-lab";
+// CURATED_ORG는 파일 상단으로 hoist됨 (refactor(6b)).
 
 function fetchOrgRepos(org) {
   return new Promise((resolve, reject) => {
