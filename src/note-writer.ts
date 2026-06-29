@@ -17,13 +17,13 @@ Then the note body, using this exact structure with these EXACT headings (in thi
 (2-3 lines max — this section also serves as the note summary)
 
 ## 핵심 원리 (제1원리 유도)
-(the principle(s) the session derived, NOT a list of topic names — for each: from which assumption / symmetry / variational principle it follows, and the "왜 이렇게 작동하는가" of the mechanism. Put the key derivation steps and the resulting law here as math.)
+(the principle(s) the session derived, NOT a list of topic names. Capture the actual **derivation skeleton** — 가정(assumption/symmetry/variational principle) → 핵심 단계(key steps) → 결과 법칙(resulting law) — so the note can be re-derived from, not just recalled. Write the resulting law as display math ($$...$$). Where natural, add a one-line **dimensional check** confirming the result is consistent (e.g. $[E]=[m][c]^2=\\mathrm{kg\\,m^2/s^2}$). Keep the "왜 이렇게 작동하는가" of the mechanism explicit.)
 
 ## 직관 / 비유
 (the analogies or mental models that landed for the learner — pulled from the actual conversation. Only metaphors that can be cashed out in the derivation; no "신비로움"에 기댄 설명.)
 
 ## 경계 / 극한 (언제 무너지나)
-(the domain of validity drawn this session: the assumptions named explicitly, the limiting cases tested ($v\\to c$, $T\\to 0$, $N\\to\\infty$, $\\hbar\\to 0$, …), and the counterexamples that mark where the law breaks or hands off to a deeper theory)
+(the domain of validity drawn this session. Name each assumption explicitly, and **for each, give the limit where it fails** ($v\\to c$, $T\\to 0$, $N\\to\\infty$, $\\hbar\\to 0$, …) and what the law becomes there — diverges, saturates, or hands off to a deeper theory. Include any counterexample that marked the boundary. This section should be substantial — a thin boundary means the principle wasn't really stress-tested.)
 
 ## 헷갈렸던 / 확인이 필요한 지점
 (things the learner got wrong, hesitated on, or asked twice — be specific, this is the most valuable section)
@@ -43,6 +43,7 @@ Rules:
 - Be ruthlessly concrete. Quote the learner's own framings when possible.
 - Don't fabricate content that wasn't in the conversation.
 - Math notation: keep formulas in LaTeX with $...$ (inline) / $$...$$ (display) — Obsidian renders these natively. Never wrap math in backticks; convert any unicode math (x², σ², ℏ, ∇, ∂) from the conversation into proper LaTeX. The key derivations and the resulting laws from the session belong in the note as display math.
+- "핵심 원리"는 결론만 적지 말고 **유도 골격**(가정 → 단계 → 결과 법칙)을 남기고, 가능하면 차원·극한 점검 한 줄로 검산할 것. 이것이 노트를 "외운 것"이 아니라 "다시 유도할 수 있는 것"으로 만든다.
 - If a section has nothing real to put in it, write a single italicized line like "_이번 세션에서 다루지 않음._".
 - Tags should reflect topic, not meta ("noether-theorem", "phase-transition", "hawking-radiation", not "physics", "study").
 - If the session substantially engaged one of the recurring cross-layer principles, ALSO include it as a tag: "symmetry", "least-action", "entropy", "information", "emergence". These power cross-layer recall in later sessions.
