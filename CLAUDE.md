@@ -34,7 +34,7 @@
 - [x] **클라이언트 리브랜드 잔재** — 분기 시 놓친 것들 정리: `client/index.html` 브랜드 타이틀이 "Spiral Buddy Blue"였음(가장 큰 노출), setup wizard·설정 모달의 `iq-dev-lab` 표시 문자열, `displayWorkspaceName`/`_parentDirOfRoadmapRoot`를 `iq-<x>-lab` 제네릭으로. 자동 다운로드 **기능**은 이미 `CURATED_ORG="iq-physis-lab"`로 정상이었고 표시만 잔재였음.
 - [x] **GitHub remote + CI** — origin = `iq-spiral-galaxy/spiral-buddy-black`(이미 연결, public). 워크플로 release.yml(v* 태그 트리거)·cla.yml·dco.yml 존재 + Blue 잔재(릴리스 노트 다운로드 URL·CLA 문서 링크) 정리.
 - [x] **첫 릴리스 v0.1.0 published** (2026-06-23) — 3 OS CI 빌드 성공. 아티팩트 이름 `Spiral.Buddy.Black-0.1.0-*`(+ alias `Spiral-Buddy-latest-*`)이 추정과 정확히 일치 → buildInstallScript·릴리스 노트 테이블 검증됨.
-- [x] **CI pnpm 11 빌드게이트 우회** — pnpm 11.1.1이 `onlyBuiltDependencies`(package.json/.npmrc/pnpm-workspace.yaml 전부)를 무시해 electron/esbuild postinstall이 막힘 → `ERR_PNPM_IGNORED_BUILDS` install 실패. release.yml install에 `--config.dangerouslyAllowAllBuilds=true` 추가로 해결(clean-room 재현·검증). **패밀리 공통 잠재 이슈** — Red/Green/Blue도 다음 릴리스 때 동일 패치 필요. [[rgb-multirepo-port-gotchas]] 참고.
+- [x] **CI pnpm 11 빌드게이트 우회** — pnpm 11.1.1이 `onlyBuiltDependencies`(package.json/.npmrc/pnpm-workspace.yaml 전부)를 무시해 electron/esbuild postinstall이 막힘 → `ERR_PNPM_IGNORED_BUILDS` install 실패. release.yml install에 `--config.dangerouslyAllowAllBuilds=true` 추가로 해결(clean-room 재현·검증). **v0.1.12 정리**: `pnpm-workspace.yaml`(allowBuilds+nodeLinker)을 `.gitignore`에서 빼 **추적**(로컬엔 있었지만 미커밋 footgun) → 빌드게이트는 workspace `allowBuilds`에 위임하고 release.yml의 build-gate 플래그 제거(안 먹으면 safe-fail). `nodeLinker`는 silent-fail 방지로 release.yml env에 유지. **패밀리 공통 잠재 이슈** — Red/Green/Blue도 동일(White는 pnpm-workspace.yaml 방식으로 해결). [[rgb-multirepo-port-gotchas]] 참고.
 
 ## 실행
 

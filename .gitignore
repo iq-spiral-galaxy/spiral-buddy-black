@@ -9,4 +9,3 @@ release/
 .idea/
 coverage/
 .cache/
-pnpm-workspace.yaml
