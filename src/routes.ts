@@ -37,7 +37,6 @@ import { generateNote, parseTranscriptSection } from "./note-writer.js";
 import {
   SESSION_SYSTEM,
   MATH_RENDER_NOTE,
-  buildInitialContext,
   buildInitialContextBlocks,
   CHAPTER_CONTENT_MAX,
   createSession,
@@ -51,8 +50,6 @@ import {
   refreshCuratedRepo,
   uninstallCuratedRepo,
   discoverCuratedRoadmaps,
-  parseCuratedId,
-  type CuratedRepoInfo,
 } from "./curated.js";
 import {
   groupReposByCategory,
