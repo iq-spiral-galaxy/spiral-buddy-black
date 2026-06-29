@@ -9,7 +9,7 @@ Output PLAIN MARKDOWN — NOT JSON. Do not wrap the note in a JSON object, and d
 
 Start with ONE tags line (3-6 topical tags, comma-separated, no '#'), then a blank line:
 
-TAGS: redis-memory, cow-semantics, fork-internals
+TAGS: noether-theorem, lagrangian-mechanics, symmetry
 
 Then the note body, using this exact structure with these EXACT headings (in this order). The flow is the Physis arc — 원리 → 경계 → 창발 (Principle → Boundary → Emergence):
 

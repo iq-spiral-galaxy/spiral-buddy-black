@@ -112,7 +112,7 @@ async function main() {
       description:
         "사용 가능한 모든 학습 로드맵을 두 가지 소스에서 통합 반환합니다:\n" +
         "1. **Local** — SPIRAL_ROADMAP_ROOT 아래에서 자동 탐지된 로드맵 (사용자의 로컬 자료)\n" +
-        "2. **Curated** — GitHub 조직(예: iq-dev-lab)의 public 레포 중 이미 설치된 것\n\n" +
+        "2. **Curated** — GitHub 조직(예: iq-physis-lab)의 public 레포 중 이미 설치된 것\n\n" +
         "어떤 로드맵으로 학습할지 사용자가 정하지 않았다면 이 도구를 먼저 호출하고 결과를 마크다운 표 그대로 보여주세요. " +
         "Curated 레포 중 아직 설치되지 않은 것을 보려면 `include_available=true`로 호출하세요 — 사용자가 '받기/install' 의사를 표하면 `spiral_install_curated`로 클론할 수 있습니다. " +
         "각 로드맵의 id는 후속 도구의 roadmap_id 인자로 사용합니다. " +
@@ -242,13 +242,13 @@ async function main() {
         description:
           `GitHub 조직 \`${org}\`의 public 레포를 로컬 캐시(.cache/curated/)에 git clone합니다. ` +
           "이미 설치된 레포면 알림만 반환. 클론 후엔 `spiral_list_roadmaps`로 새 로드맵이 보입니다. " +
-          "사용자가 'redis 로드맵으로 학습하자' 같이 명시한 레포를 처음 사용할 때 호출하세요. " +
+          "사용자가 '양자역학 로드맵으로 학습하자' 같이 명시한 레포를 처음 사용할 때 호출하세요. " +
           "shallow clone(--depth=1)이라 빠르고 디스크 절약됩니다.",
         inputSchema: {
           repo_name: z
             .string()
             .describe(
-              `${org}의 레포 이름 (예: 'redis-deep-dive'). spiral_list_roadmaps에 include_available=true로 호출해 정확한 이름 확인.`,
+              `${org}의 레포 이름 (예: 'quantum-mechanics-distilled'). spiral_list_roadmaps에 include_available=true로 호출해 정확한 이름 확인.`,
             ),
         },
       },
@@ -319,7 +319,7 @@ async function main() {
         roadmap_id: z
           .string()
           .describe(
-            "spiral_list_roadmaps에서 얻은 로드맵 id (예: 'transaction-mvcc' 또는 'spring ecosystem/spring-core-deep-dive/transaction-mvcc')",
+            "spiral_list_roadmaps에서 얻은 로드맵 id (예: 'ch1-why-quantum' 또는 'quantum-mechanics-distilled/ch1-why-quantum')",
           ),
       },
     },
@@ -402,7 +402,7 @@ async function main() {
         chapter_id: z
           .string()
           .describe(
-            "spiral_list_chapters에서 얻은 챕터 id (예: '01-acid.md')",
+            "spiral_list_chapters에서 얻은 챕터 id (예: '01-classical-fails.md')",
           ),
       },
     },
@@ -609,7 +609,7 @@ async function main() {
         "\n\n세션과 같은 언어로 작성하세요 (보통 한국어). " +
         "'헷갈렸던 / 확인이 필요한 지점' 섹션이 핵심 — 다음 spiral 세션의 진입점이므로 학습자가 실제로 헤맸던 부분을 구체적으로 기록하세요. " +
         "각 섹션에 진짜로 다룬 내용이 없으면 `_이번 세션에서 다루지 않음._` 한 줄로 처리. " +
-        "tags는 주제 태그만 (예: 'spring-ioc') — 'study', 'learning' 같은 메타 태그 금지. " +
+        "tags는 주제 태그만 (예: 'noether-theorem') — 'study', 'learning' 같은 메타 태그 금지. " +
         "누락된 헤딩이 있으면 자동 보충되지만 가급적 모두 채우세요.",
       inputSchema: {
         roadmap_id: z.string().describe("spiral_list_roadmaps에서 얻은 로드맵 id"),
