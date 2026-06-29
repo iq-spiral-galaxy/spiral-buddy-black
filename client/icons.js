@@ -71,7 +71,7 @@ const ICON_SVG = {
   sparkle: `<path d="M12 3.5l1.7 5.8 5.8 1.7-5.8 1.7L12 18.5l-1.7-5.8L4.5 11l5.8-1.7z"/><path d="M18.3 4.2l.5 1.7 1.7.5-1.7.5-.5 1.7-.5-1.7-1.7-.5 1.7-.5z"/>`,
 };
 
-function svgIcon(name, className = "inline-icon") {
+export function svgIcon(name, className = "inline-icon") {
   const body = ICON_SVG[name] ?? ICON_SVG.folder;
   return `<svg class="${className}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${body}</svg>`;
 }
