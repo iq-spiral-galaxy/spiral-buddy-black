@@ -62,6 +62,7 @@ function makeNote(overrides: Partial<SpiralNote> = {}): SpiralNote {
     roadmapName: null,
     repo: null,
     date: "2026-01-01",
+    modifiedAt: "2026-01-01T00:00:00.000Z",
     depth: 1,
     tags: [],
     summary: "",
@@ -192,7 +193,7 @@ describe("vault: escapeYaml (via writeNewNote frontmatter)", () => {
 
 // ===========================================================================
 // vault.ts — listSpiralNotes (tmp dir fixture)
-//   reads spiral-buddy/ subdir, parses frontmatter, sorts by date desc,
+//   reads spiral-buddy-black/ subdir, parses frontmatter, sorts by actual mtime,
 //   ignores _index.md and .trash/**, supports old + new schema.
 // ===========================================================================
 
@@ -211,7 +212,7 @@ describe("vault: listSpiralNotes", () => {
 
   test("parses new-schema note, ignores _index.md, sorts newest-first", async () => {
     const vault = await mkTmp("list1");
-    const spiralRoot = path.join(vault, "spiral-buddy");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
     await writeRaw(
       spiralRoot,
       "older d1.md",
@@ -273,9 +274,44 @@ describe("vault: listSpiralNotes", () => {
     assert.equal(older.topic, "01. Older");
   });
 
+  test("same-day notes are ordered by file modification time", async () => {
+    const vault = await mkTmp("list-same-day");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
+    const firstPath = path.join(spiralRoot, "first.md");
+    const lastPath = path.join(spiralRoot, "last.md");
+    await writeRaw(
+      spiralRoot,
+      "first.md",
+      '---\nchapter: "First"\nchapter_id: first.md\ndate: 2026-07-29\n---\nbody',
+    );
+    await writeRaw(
+      spiralRoot,
+      "last.md",
+      '---\nchapter: "Last"\nchapter_id: last.md\ndate: 2026-07-29\n---\nbody',
+    );
+    await fs.utimes(
+      firstPath,
+      new Date("2026-07-29T01:00:00Z"),
+      new Date("2026-07-29T01:00:00Z"),
+    );
+    await fs.utimes(
+      lastPath,
+      new Date("2026-07-29T02:00:00Z"),
+      new Date("2026-07-29T02:00:00Z"),
+    );
+
+    invalidateNotesCache();
+    const notes = await listSpiralNotes(vault);
+    assert.deepEqual(
+      notes.map((note) => note.chapterId),
+      ["last.md", "first.md"],
+    );
+    assert.ok(notes[0]!.modifiedAt > notes[1]!.modifiedAt);
+  });
+
   test("old-schema note: repo + roadmapName inferred from roadmap_id; chapterId preserved", async () => {
     const vault = await mkTmp("list2");
-    const spiralRoot = path.join(vault, "spiral-buddy");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
     await writeRaw(
       spiralRoot,
       "legacy.md",
@@ -308,7 +344,7 @@ describe("vault: listSpiralNotes", () => {
 
   test("ignores notes inside .trash/", async () => {
     const vault = await mkTmp("list3");
-    const spiralRoot = path.join(vault, "spiral-buddy");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
     await writeRaw(spiralRoot, "live.md", "---\nchapter: \"Live\"\ndate: 2026-01-01\n---\nbody");
     await writeRaw(
       path.join(spiralRoot, ".trash"),
@@ -323,7 +359,7 @@ describe("vault: listSpiralNotes", () => {
 
   test("missing date defaults to today (bounded: a valid YYYY-MM-DD)", async () => {
     const vault = await mkTmp("list4");
-    const spiralRoot = path.join(vault, "spiral-buddy");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
     await writeRaw(spiralRoot, "nodate.md", "---\nchapter: \"X\"\n---\nbody");
     invalidateNotesCache();
     const notes = await listSpiralNotes(vault);
@@ -333,7 +369,7 @@ describe("vault: listSpiralNotes", () => {
 
   test("returned array is a copy — mutating it does not corrupt the cache", async () => {
     const vault = await mkTmp("list5");
-    const spiralRoot = path.join(vault, "spiral-buddy");
+    const spiralRoot = path.join(vault, "spiral-buddy-black");
     await writeRaw(spiralRoot, "a.md", "---\nchapter: \"A\"\ndate: 2026-01-01\n---\nx");
     invalidateNotesCache();
     const first = await listSpiralNotes(vault);

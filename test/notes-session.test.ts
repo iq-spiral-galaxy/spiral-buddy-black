@@ -56,6 +56,7 @@ function makeNote(over: Partial<SpiralNote> = {}): SpiralNote {
     body: "본문 내용".repeat(50),
     depth: 1,
     date: "2026-01-01",
+    modifiedAt: "2026-01-01T00:00:00.000Z",
     relativePath: "spiral-buddy/2026-01-01-acid-d1.md",
     filePath: "/vault/spiral-buddy/2026-01-01-acid-d1.md",
     chapterId: "01-acid.md",
@@ -573,9 +574,9 @@ describe("chapter-preview-cache / save + load + isPreviewCached (tmp vault)", ()
   test("savePreview creates the .preview-cache directory if absent", async () => {
     const vault = await fs.mkdtemp(path.join(os.tmpdir(), "spiral-prev-"));
     try {
-      // vault exists but spiral-buddy/.preview-cache does not yet
+      // vault exists but spiral-buddy-black/.preview-cache does not yet
       await savePreview(vault, "r", "c.md", makeCard());
-      const dir = path.join(vault, "spiral-buddy", ".preview-cache");
+      const dir = path.join(vault, "spiral-buddy-black", ".preview-cache");
       const stat = await fs.stat(dir);
       assert.ok(stat.isDirectory());
     } finally {

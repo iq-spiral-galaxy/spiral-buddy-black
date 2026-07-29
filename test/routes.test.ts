@@ -219,6 +219,7 @@ describe("GET /chapters", () => {
     assert.deepEqual(a.depths, []);
     assert.deepEqual(a.noteLinks, []);
     assert.equal(a.lastDate, null);
+    assert.equal(a.needsBoundaryReview, false);
     assert.equal(a.aiCardReady, false);
     assert.equal(typeof a.preview, "string");
     assert.ok(a.preview.length > 0);
@@ -239,6 +240,65 @@ describe("GET /chapters", () => {
     assert.equal(res.status, 200);
     const body = await res.json();
     assert.equal(body.roadmapId, "jvm-deep-dive");
+  });
+
+  test("surfaces a recent thin Physis boundary without an extra model request", async () => {
+    const { writeNewNote } = await import("../src/vault.js");
+    const v = await fs.mkdtemp(path.join(os.tmpdir(), "spiral-boundary-"));
+    try {
+      await writeNewNote(v, {
+        topic: "Class Loading",
+        chapterId: "01-x.md",
+        roadmapId: "jvm-deep-dive",
+        roadmapName: "jvm-deep-dive",
+        repo: null,
+        roadmap: "jvm-deep-dive",
+        depth: 1,
+        tags: [],
+        summary: "클래스 로딩의 기본 원리를 확인했다.",
+        body: [
+          "## 핵심 원리 (제1원리 유도)",
+          "요약",
+          "",
+          "## 경계 / 극한 (언제 무너지나)",
+          "아직 짧게만 확인함",
+          "",
+          "## 창발 (그 위에서 나타나는 것)",
+          "요약",
+        ].join("\n"),
+        relatedNotePaths: [],
+      });
+
+      const app = createApi(baseConfig({ vaultPath: v }));
+      const res = await app.request(
+        "/chapters?roadmap_id=jvm-deep-dive",
+      );
+      assert.equal(res.status, 200);
+      const body = await res.json();
+      const chapter = body.chapters.find(
+        (item: { id: string }) => item.id === "01-x.md",
+      );
+      assert.equal(chapter.visitCount, 1);
+      assert.equal(chapter.needsBoundaryReview, true);
+    } finally {
+      await fs.rm(v, { recursive: true, force: true });
+      invalidateNotesCache();
+    }
+  });
+});
+
+describe("GET /principles", () => {
+  test("returns the five Black cross-layer principles on an empty vault", async () => {
+    const app = createApi(baseConfig());
+    const res = await app.request("/principles");
+    assert.equal(res.status, 200);
+    const body = await res.json();
+    assert.equal(body.totalNotes, 0);
+    assert.equal(body.taggedNotes, 0);
+    assert.deepEqual(
+      body.principles.map((principle: { key: string }) => principle.key),
+      ["symmetry", "least-action", "entropy", "information", "emergence"],
+    );
   });
 });
 
@@ -272,17 +332,22 @@ describe("GET /search", () => {
     assert.deepEqual(body.notes, []); // empty vault
   });
 
-  test("matches chapter by title within a matched roadmap", async () => {
+  test("matches a chapter title even when its roadmap and notes do not match", async () => {
     const app = createApi(baseConfig());
-    // "garbage" only appears in chapter 02 title, not the roadmap name —
-    // but the roadmap is reached via... actually the roadmap won't match
-    // "garbage". So chapter search only runs over candidate roadmaps
-    // (matched roadmaps + roadmaps with matching notes). With no name match
-    // and no notes, there are zero candidate roadmaps -> no chapter hits.
+    // "garbage" only appears in chapter 02's title. Chapter search must not
+    // depend on a roadmap-name or note match to discover it.
     const res = await app.request("/search?q=garbage");
     const body = await res.json();
     assert.deepEqual(body.roadmaps, []);
-    assert.deepEqual(body.chapters, []);
+    assert.deepEqual(body.notes, []);
+    assert.deepEqual(body.chapters, [
+      {
+        roadmapId: "jvm-deep-dive",
+        roadmapName: "jvm-deep-dive",
+        chapterId: "02-y.md",
+        title: "Garbage Collection",
+      },
+    ]);
   });
 
   test("query matching both roadmap name and a chapter id yields chapter hits", async () => {

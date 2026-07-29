@@ -17,7 +17,8 @@ import { type ClaudeClient, completeOnce } from "./claude.js";
 import type { Chapter } from "./roadmap.js";
 
 // vault.ts의 SPIRAL_DIR과 동일 정책 (workspace별 다른 sub-dir 지원).
-const SPIRAL_DIR = process.env.SPIRAL_VAULT_SUBDIR?.trim() || "spiral-buddy";
+const SPIRAL_DIR =
+  process.env.SPIRAL_VAULT_SUBDIR?.trim() || "spiral-buddy-black";
 const PREVIEW_CACHE_DIR = ".preview-cache";
 
 /** Claude로 미리보기 생성할 때 본문 잘림 길이 (안 그러면 너무 길어서 비효율). */

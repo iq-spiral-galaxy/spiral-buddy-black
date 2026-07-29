@@ -81,8 +81,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libfuse2 || sudo apt-get install -y libfuse2t64
 
-      - name: Build TypeScript
-        run: pnpm exec tsc
+      - name: Build client assets and TypeScript
+        run: pnpm build
 
       - name: Build Electron app (publish=never)
         env:
@@ -123,22 +123,26 @@ jobs:
           # macOS arm64
           for f in release/*-arm64.dmg; do
             [ -f "$f" ] || continue
+            cp "$f" "release/latest-aliases/Spiral-Buddy-Black-latest-arm64.dmg"
             cp "$f" "release/latest-aliases/Spiral-Buddy-latest-arm64.dmg"
           done
           # macOS Intel (버전만 들어간 dmg — arm64 가 아닌 것)
           for f in release/*.dmg; do
             case "$f" in *-arm64.dmg) continue;; esac
             [ -f "$f" ] || continue
+            cp "$f" "release/latest-aliases/Spiral-Buddy-Black-latest.dmg"
             cp "$f" "release/latest-aliases/Spiral-Buddy-latest.dmg"
           done
           # Windows setup
           for f in release/*Setup*.exe; do
             [ -f "$f" ] || continue
+            cp "$f" "release/latest-aliases/Spiral-Buddy-Black-latest-Setup.exe"
             cp "$f" "release/latest-aliases/Spiral-Buddy-latest-Setup.exe"
           done
           # Linux AppImage
           for f in release/*.AppImage; do
             [ -f "$f" ] || continue
+            cp "$f" "release/latest-aliases/Spiral-Buddy-Black-latest.AppImage"
             cp "$f" "release/latest-aliases/Spiral-Buddy-latest.AppImage"
           done
           ls -la release/latest-aliases/ || true
@@ -161,7 +165,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: spiral-buddy-${{ runner.os }}
+          name: spiral-buddy-black-${{ runner.os }}
           path: |
             release/*.dmg
             release/*.exe
@@ -196,7 +200,7 @@ jobs:
           ```bash
           osascript -e 'tell application "Spiral Buddy Black" to quit' 2>/dev/null; sleep 1; \
           cd /tmp && \
-          curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-latest-arm64.dmg" && \
+          curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest-arm64.dmg" && \
           MOUNT=$(hdiutil attach -nobrowse /tmp/spiral.dmg | grep -o '/Volumes/.*' | head -1) && \
           rm -rf '/Applications/Spiral Buddy Black.app' && \
           cp -R "$MOUNT/Spiral Buddy Black.app" /Applications/ && \
@@ -213,7 +217,7 @@ jobs:
           ```bash
           osascript -e 'tell application "Spiral Buddy Black" to quit' 2>/dev/null; sleep 1; \
           cd /tmp && \
-          curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-latest.dmg" && \
+          curl -fL -o /tmp/spiral.dmg "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest.dmg" && \
           MOUNT=$(hdiutil attach -nobrowse /tmp/spiral.dmg | grep -o '/Volumes/.*' | head -1) && \
           rm -rf '/Applications/Spiral Buddy Black.app' && \
           cp -R "$MOUNT/Spiral Buddy Black.app" /Applications/ && \
@@ -232,8 +236,8 @@ jobs:
           ```powershell
           $ErrorActionPreference = "Stop"
           Get-Process "Spiral Buddy Black" -EA SilentlyContinue | Stop-Process -Force
-          $exe = "$env:TEMP\spiral-buddy-setup.exe"
-          Invoke-WebRequest -Uri "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-latest-Setup.exe" -OutFile $exe
+          $exe = "$env:TEMP\spiral-buddy-black-setup.exe"
+          Invoke-WebRequest -Uri "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest-Setup.exe" -OutFile $exe
           Start-Process -FilePath $exe -ArgumentList "/S" -Wait
           Remove-Item $exe -Force
           $app = "$env:LOCALAPPDATA\Programs\spiral-buddy-black\Spiral Buddy Black.exe"
@@ -245,9 +249,9 @@ jobs:
           <summary>🐧 <strong>Linux — AppImage</strong></summary>
 
           ```bash
-          curl -fL -o ~/SpiralBuddy.AppImage "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-latest.AppImage"
-          chmod +x ~/SpiralBuddy.AppImage
-          ~/SpiralBuddy.AppImage
+          curl -fL -o ~/SpiralBuddyBlack.AppImage "https://github.com/iq-spiral-galaxy/spiral-buddy-black/releases/latest/download/Spiral-Buddy-Black-latest.AppImage"
+          chmod +x ~/SpiralBuddyBlack.AppImage
+          ~/SpiralBuddyBlack.AppImage
           ```
           </details>
 

@@ -9,3 +9,5 @@ release/
 .idea/
 coverage/
 .cache/
+.pnpm-store/
+pnpm-workspace.yaml

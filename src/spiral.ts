@@ -35,7 +35,7 @@ Principles:
 
 // 노트의 "경계 / 극한" 섹션이 실제로 채워졌는지 — deeper-layer 신호용.
 // 비었거나 placeholder거나 60자 미만이면 "얇음"(경계를 안 짚음).
-function boundaryStatus(body: string): "충실" | "얇음" {
+export function boundaryStatus(body: string): "충실" | "얇음" {
   const lines = (body ?? "").split("\n");
   const start = lines.findIndex((l) => /^##\s+경계\s*\/\s*극한/.test(l));
   if (start === -1) return "얇음";
@@ -156,4 +156,3 @@ function isMode(v: unknown): v is SpiralSuggestion["mode"] {
     v === "cross-link"
   );
 }
-

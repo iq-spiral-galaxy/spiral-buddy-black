@@ -724,10 +724,10 @@ describe("POST /session/:id/end", () => {
       assert.match(sse, /"path":/);
       assert.match(sse, /"depth":/);
 
-      // a note file actually landed under <vault>/spiral-buddy/
+      // a note file actually landed under <vault>/spiral-buddy-black/
       const notes = await listSpiralNotes(v);
       assert.equal(notes.length, 1);
-      const spiralDir = path.join(v, "spiral-buddy");
+      const spiralDir = path.join(v, "spiral-buddy-black");
       const files = (await fs.readdir(spiralDir)).filter((f) =>
         f.endsWith(".md"),
       );

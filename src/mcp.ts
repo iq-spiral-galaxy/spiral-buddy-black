@@ -56,13 +56,15 @@ async function main() {
   }
 
   const vaultPath = config.vaultPath;
+  const vaultSubDir =
+    process.env.SPIRAL_VAULT_SUBDIR?.trim() || "spiral-buddy-black";
 
   // getInstalledRoadmaps / resolveRoadmap 는 ./roadmap-service.js 로 분리됨 (routes와 공유).
   // (이전 mcp 전용 resolveRoadmapByIdOrName == resolveRoadmap, null 분기만 미사용)
 
   const server = new McpServer({
-    name: "iq-spiral-buddy",
-    version: "0.3.0",
+    name: "spiral-buddy-black",
+    version: "0.6.10",
   });
 
   // ─────────────────────────────────────────────────────
@@ -545,7 +547,7 @@ async function main() {
       },
     },
     async ({ relative_path }) => {
-      const filePath = path.join(vaultPath, "spiral-buddy", relative_path);
+      const filePath = path.join(vaultPath, vaultSubDir, relative_path);
       try {
         const content = await fs.readFile(filePath, "utf-8");
         return { content: [{ type: "text", text: content }] };
@@ -618,7 +620,7 @@ async function main() {
       const { missing, patchedBody } = validateAndPatchSections(body);
 
       const relatedAbs = (related_note_paths ?? []).map((rp) =>
-        path.join(vaultPath, "spiral-buddy", rp),
+        path.join(vaultPath, vaultSubDir, rp),
       );
 
       // roadmap.id (예: "unit-testing/anatomy-of-good-tests") → repo + roadmap path
@@ -674,7 +676,7 @@ async function main() {
     {
       title: "학습 노트 삭제 (vault의 .trash/로 이동, 복구 가능)",
       description:
-        "특정 챕터 또는 로드맵의 노트를 vault의 spiral-buddy/.trash/로 이동합니다. fs.unlink가 아니라 rename이라 사용자가 직접 복구 가능합니다. " +
+        "특정 챕터 또는 로드맵의 노트를 현재 워크스페이스 노트 폴더의 .trash/로 이동합니다. fs.unlink가 아니라 rename이라 사용자가 직접 복구 가능합니다. " +
         "범위 결정:\n" +
         "- chapter_id 있으면: 그 챕터만\n" +
         "- chapter_id 없으면: roadmap의 모든 챕터\n" +
@@ -881,7 +883,7 @@ async function main() {
   const local = roadmaps.filter((r) => r.source === "local").length;
   const curated = roadmaps.filter((r) => r.source === "curated").length;
   process.stderr.write(
-    `[iq-spiral-buddy MCP] connected (v0.3.0)\n` +
+    `[spiral-buddy-black MCP] connected (v0.6.10)\n` +
       `  roadmap root: ${config.roadmapRoot ?? "(unset)"}\n` +
       `  curated org:  ${config.curatedOrg ?? "(disabled)"}\n` +
       `  vault:        ${vaultPath}\n` +

@@ -1,6 +1,7 @@
 allowBuilds:
   electron: true
-  esbuild: false
+  # scripts/build-client-vendor.mjs가 각 플랫폼의 esbuild binary를 사용한다.
+  esbuild: true
 # transitive deps가 electron-builder packaging에 누락되지 않도록 npm 스타일 평탄
 # node_modules 사용. (.npmrc의 node-linker=hoisted와 동일 효과 — 이중 안전망)
 nodeLinker: hoisted
