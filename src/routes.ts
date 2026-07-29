@@ -1110,16 +1110,16 @@ function registerAiRoutes(app: Hono, config: Config, client: ClaudeClient) {
       concise:
         "사용자가 학습 대화 중에 모르는 개념을 빠르게 확인하려고 한다. " +
         "1-2 문장으로 핵심만 답한다. 부연 설명·예시·연관 개념 언급 금지. " +
-        "한국어로, 단정적인 정의 위주. 필요하면 핵심 수식 한 줄($...$)까지만.",
+        "한국어로, 단정적인 정의 위주. 필요하면 핵심 수식 한 줄까지만.",
       medium:
         "사용자가 학습 대화 중 모르는 개념을 좀 더 알고 싶어한다. " +
         "2-3 문단으로 정의 + 제1원리(왜 그렇게 되는가) + 한 줄 극한/직관. " +
-        "수식은 LaTeX($...$). 마크다운 사용 가능. 한국어로. 길어지지 말 것.",
+        "필요한 수식을 정확히 포함한다. 마크다운 사용 가능. 한국어로. 길어지지 말 것.",
       deep:
         "사용자가 학습 대화 중 모르는 개념을 깊이 있게 알고 싶어한다. " +
         "다음 구조로 마크다운 답변:\n" +
         "## 한 줄 정의\n## 제1원리 유도\n## 극한·경계 (언제 무너지나)\n## 흔한 직관의 함정\n## 관련 원리\n" +
-        "각 섹션 2-4문장, 수식은 LaTeX($...$ / $$...$$). 한국어. 형식은 정확히 지킬 것.",
+        "각 섹션 2-4문장, 필요한 수식 포함. 한국어. 형식은 정확히 지킬 것.",
     };
     const maxTokensByDepth: Record<string, number> = {
       concise: 280,
@@ -1223,28 +1223,23 @@ function registerAiRoutes(app: Hono, config: Config, client: ClaudeClient) {
     const ctxMax = CHAPTER_CONTENT_MAX;
     const truncatedNote =
       fullLen > ctxMax
-        ? `\n\n⚠️ 본문이 ${fullLen}자로 매우 길어 ${ctxMax}자에서 잘림. 잘린 뒤 부분은 확인 못함.`
+        ? `\n\n주의: 본문이 ${fullLen}자로 매우 길어 ${ctxMax}자에서 잘림. 잘린 뒤 부분은 확인 못함.`
         : "";
 
     const systemPrompt =
       "사용자가 학습 대화 중 Buddy의 어떤 메시지에 대해 '챕터의 어디서 온 맥락이지?'라고 궁금해한다. " +
       "주어진 챕터 본문에서 Buddy 메시지가 다루는 부분을 찾아 다음 마크다운 구조로 답한다:\n\n" +
-      "🔖 본문 인용 (대략)\n" +
+      "## 본문 인용 (대략)\n" +
       "> (본문에서 가장 가까운 실제 문장 1-3개. 본문에 없는 표현은 인용하지 말 것. " +
       "본문에서 직접 매칭 안 되면 '본문에서 그 부분 직접 못 찾음'이라고 정직히 말한다)\n\n" +
-      "💡 Buddy의 맥락\n" +
+      "## Buddy의 맥락\n" +
       "(Buddy가 이 메시지에서 챕터의 어떤 개념/단계를 다루려고 하는지 2-3문장 요약. " +
       "Buddy 메시지 자체를 다시 풀어쓰지 말고, 챕터 본문 기준으로 위치를 잡아준다.)\n\n" +
       "규칙: \n" +
       "- 직접 인용은 본문에 있는 표현만. 추측 인용은 절대 금지.\n" +
-      "- Buddy가 본문에 없는 detail을 말한 것 같으면 ⚠️ 표시로 알린다: " +
-      "'⚠️ 본문에선 이 부분 직접 안 다룸 — Buddy가 일반 지식 기반으로 말한 것 같음'.\n" +
-      "- **수식 포맷팅 (필수)**: 본문에 수식·기호·물리량이 나오면 반드시 LaTeX로 표기한다. " +
-      "  · 인라인: $E=mc^2$, $\\nabla\\cdot\\mathbf{E}=\\rho/\\varepsilon_0$, $\\hbar$. " +
-      "  · 유도·긴 식은 디스플레이로: $$...$$ (한 줄). " +
-      "  · '본문 인용' blockquote(> ) 안에서도 수식은 LaTeX로 — 유니코드(x²·σ·∇)나 " +
-      "    plain text로 흘리지 말 것. (드물게 실제 코드가 있으면 백틱/펜스 사용.)\n" +
-      "- '본문 인용' 안의 자연어 문장은 따옴표(\"...\")로, 수식은 LaTeX로 시각 분리.\n" +
+      "- Buddy가 본문에 없는 detail을 말한 것 같으면 '주의: 본문에선 이 부분 직접 안 다룸 — Buddy가 일반 지식 기반으로 말한 것 같음'이라고 알린다.\n" +
+      "- 본문의 물리 수식은 의미를 보존해 옮기고, 기호·가정·차원 맥락을 잃지 말 것.\n" +
+      "- '본문 인용' 안의 자연어 문장은 따옴표로 시각 분리.\n" +
       "- 짧게. 전체 300-450자 정도(수식 제외). 한국어. 마크다운 사용 가능.\n\n" +
       MATH_RENDER_NOTE;
 
@@ -1349,6 +1344,7 @@ function registerAiRoutes(app: Hono, config: Config, client: ClaudeClient) {
         messages: [{ role: "user", content: userMessage }],
         model: body?.model,
         maxTokens: 1200,
+        mathOutput: true,
       });
       let refined = text.trim();
       // 혹시 모델이 코드블록으로 감쌌으면 벗긴다
@@ -1439,13 +1435,15 @@ function registerSessionRoutes(app: Hono, config: Config, client: ClaudeClient) 
     c.header("X-Model", session.model ?? config.model);
 
     return streamText(c, async (stream) => {
+      let deliveredText = "";
       try {
         const { text, usage } = await streamTurn(client, {
           system: SESSION_SYSTEM,
           messages: session.messages,
           model: session.model,
-          onText: (chunk) => {
-            stream.write(chunk).catch(() => {});
+          onText: async (chunk) => {
+            await stream.write(chunk);
+            deliveredText += chunk;
           },
         });
         session.messages.push({ role: "assistant", content: text });
@@ -1453,11 +1451,30 @@ function registerSessionRoutes(app: Hono, config: Config, client: ClaudeClient) 
         session.totalOutputTokens += usage.output;
       } catch (err) {
         const msg = friendlyApiErrorMessage(err);
-        await stream.write(`\n\n> [!warning] 응답을 받지 못했습니다\n> ${msg}`);
+        const warning = `\n\n> [!warning] 응답이 중간에 멈췄습니다\n> ${msg}`;
+        if (deliveredText) {
+          // 이미 화면에 전달된 assistant 청크는 세션에도 그대로 남긴다.
+          // 경고까지 전달되면 같은 assistant 메시지에 함께 저장해
+          // 현재 UI, resume, 노트 원문이 서로 달라지지 않게 한다.
+          try {
+            await stream.write(warning);
+            deliveredText += warning;
+          } catch {
+            // 연결이 끊겼다면 성공적으로 전달된 본문까지만 보존한다.
+          }
+          session.messages.push({
+            role: "assistant",
+            content: deliveredText,
+          });
+        } else {
+          await stream
+            .write(`\n\n> [!warning] 응답을 받지 못했습니다\n> ${msg}`)
+            .catch(() => {});
+        }
       } finally {
         // v0.5.72 — turn 종료 시 snapshot 저장 (성공/실패 무관).
         // 첫 응답이 실패해도 부트스트랩 컨텍스트는 보존해야 resume 가능.
-        void persistSession(session);
+        await persistSession(session);
       }
     });
   });
@@ -1474,32 +1491,49 @@ function registerSessionRoutes(app: Hono, config: Config, client: ClaudeClient) 
     const pushedUserIdx = session.messages.length - 1;
 
     return streamText(c, async (stream) => {
+      let deliveredText = "";
       try {
         const { text, usage } = await streamTurn(client, {
           system: SESSION_SYSTEM,
           messages: session.messages,
           model: session.model,
-          onText: (chunk) => {
-            stream.write(chunk).catch(() => {});
+          onText: async (chunk) => {
+            await stream.write(chunk);
+            deliveredText += chunk;
           },
         });
         session.messages.push({ role: "assistant", content: text });
         session.totalInputTokens += usage.input;
         session.totalOutputTokens += usage.output;
       } catch (err) {
-        // v0.5.72 — orphaned user 메시지 rollback.
-        // 기존엔 user 메시지가 히스토리에 남은 채 assistant 응답만 없어서,
-        // 사용자가 재시도하면 같은 질문이 두 번 쌓여 다음 turn 문맥이 깨졌음.
-        if (
-          session.messages.length === pushedUserIdx + 1 &&
-          session.messages[pushedUserIdx]?.role === "user"
-        ) {
-          session.messages.pop();
-        }
         const msg = friendlyApiErrorMessage(err);
-        await stream.write(`\n\n> [!warning] 응답을 받지 못했습니다\n> ${msg}`);
+        if (deliveredText) {
+          const warning = `\n\n> [!warning] 응답이 중간에 멈췄습니다\n> ${msg}`;
+          try {
+            await stream.write(warning);
+            deliveredText += warning;
+          } catch {
+            // 연결이 끊겼다면 성공적으로 전달된 본문까지만 보존한다.
+          }
+          session.messages.push({
+            role: "assistant",
+            content: deliveredText,
+          });
+        } else {
+          // assistant가 한 글자도 전달되지 않은 경우에만 orphan user를
+          // 되돌린다. 부분 응답이 있다면 user+assistant를 모두 보존한다.
+          if (
+            session.messages.length === pushedUserIdx + 1 &&
+            session.messages[pushedUserIdx]?.role === "user"
+          ) {
+            session.messages.pop();
+          }
+          await stream
+            .write(`\n\n> [!warning] 응답을 받지 못했습니다\n> ${msg}`)
+            .catch(() => {});
+        }
       } finally {
-        void persistSession(session);
+        await persistSession(session);
       }
     });
   });

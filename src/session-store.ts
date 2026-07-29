@@ -13,17 +13,15 @@ import type { ClaudeMessage } from "./claude.js";
 export const CHAPTER_CONTENT_MAX = 18000;
 
 /**
- * v0.1.0 (Black) — 수식 표기 공통 규칙.
- * 클라이언트가 KaTeX(marked-katex-extension)로 $...$ / $$...$$를 렌더링한다.
- * 세션/룩업/챕터맥락 프롬프트에 모두 주입할 것. (노트는 Obsidian MathJax가
- * 같은 구분자를 렌더링하므로 note-writer에도 동일 규칙 적용.)
+ * Black/Physis 전용 수식 교육 규율.
+ * 구분자·KaTeX 호환성 같은 공통 출력 계약은 claude.ts의 어댑터 경계에서
+ * 일괄 주입한다. 여기에는 Black만의 "유도하고 검산하는 방식"만 둔다.
  */
-export const MATH_RENDER_NOTE = `Math notation (CRITICAL — math is rendered with KaTeX):
-- Inline math: $...$  ·  Display math: $$...$$ on its own line. These are the ONLY delimiters — never use \\( \\) or \\[ \\].
-- NEVER put math inside backticks or code fences — code spans are never math-rendered. Backticks are for code identifiers only.
-- Write LaTeX, not unicode lookalikes: $x^2$ not x², $\\sigma^2$ not σ², $\\mathbb{R}^n$ not R^n, $\\nabla\\cdot\\mathbf{E}$ not ∇·E, $\\hbar$ not ℏ, $\\partial_\\mu$ not ∂μ (inside math).
-- Keep one formula in one $...$ pair on one line — never split a formula across lines or paragraphs.
-- Use KaTeX-supported commands (\\frac, \\partial, \\nabla, \\sum, \\int, \\oint, \\langle, \\hbar, \\mathbf, \\mathbb, aligned/cases/pmatrix environments inside $$...$$).`;
+export const MATH_RENDER_NOTE = `Physis math discipline:
+- Never present a formula as authority. Expose the assumption or principle and leave the learner a derivation step to attempt.
+- For a central relation, name its symbols and assumptions, then check dimensions or units before trusting it.
+- Stress-test important equations at a physical limit or boundary and state where the approximation fails.
+- Prefer symbolic structure and scaling before substituting numbers. Preserve a readable derivation skeleton for multi-step reasoning.`;
 
 export const SESSION_SYSTEM = `You are spiral-buddy-black, a Socratic companion for understanding the physical universe from first principles, in a local web app. Your stance is Sophia — theoretical wisdom — and your motto is "Derive, don't accept": from the fewest principles, reconstruct the widest world.
 
@@ -37,7 +35,7 @@ Behavior:
 - When the learner seems confident, push to a harder case or an edge.
 - When confused, slow down: smaller concept, simpler example, then re-test.
 - If a related previous note covers something, surface it: "지난번에 [[topic]]에서 다뤘던 X 기억나? 그게 여기서 어떻게 적용될 것 같아?"
-- Your responses are rendered as markdown — use headings, lists, and bold freely, and render ALL math as LaTeX ($...$ inline, $$...$$ display). Code is rare in physics — reach for a fenced block only for the occasional snippet.
+- Your responses are rendered as markdown — use headings, lists, and bold freely, and write every physical relation explicitly. Code is rare in physics — reach for a fenced block only for the occasional snippet.
 - Keep responses focused. 3-6 short paragraphs per turn is usually right. Long lectures are a smell.
 - Match the learner's language (Korean unless they switch).
 
@@ -252,9 +250,9 @@ Excerpt: ${n.body.slice(0, 800)}`,
   const isTruncated = fullLen > CHAPTER_CONTENT_MAX;
   const isThin = fullLen < 300;
   const contentNote = isTruncated
-    ? `\n\n⚠️ 본문이 ${fullLen}자라 ${CHAPTER_CONTENT_MAX}자에서 잘림. 잘린 뒤 부분은 보지 못함 — 인용 보수적으로.`
+    ? `\n\n주의: 본문이 ${fullLen}자라 ${CHAPTER_CONTENT_MAX}자에서 잘림. 잘린 뒤 부분은 보지 못함 — 인용 보수적으로.`
     : isThin
-      ? `\n\n⚠️ 본문이 ${fullLen}자로 매우 짧음 (README 수준). 일반 지식 기반으로 진행하고 그 사실을 첫 메시지에 명시해줘.`
+      ? `\n\n주의: 본문이 ${fullLen}자로 매우 짧음 (README 수준). 일반 지식 기반으로 진행하고 그 사실을 첫 메시지에 명시해줘.`
       : "";
 
   return `오늘의 학습 세션을 시작하자. 컨텍스트는 아래.

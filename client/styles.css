@@ -9238,7 +9238,10 @@ body.light-mode .mic-guide kbd { background: #f0f3f6; border-color: #d4dae0; }
   border-bottom: 1px solid var(--border-soft);
 }
 .principle-emoji {
-  font-size: 15px;
+  width: 17px;
+  height: 17px;
+  color: var(--accent);
+  flex: 0 0 auto;
 }
 .principle-label {
   color: var(--text);

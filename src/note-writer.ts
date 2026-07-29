@@ -43,8 +43,8 @@ Rules:
 - Write in the SAME LANGUAGE as the conversation (likely Korean).
 - Be ruthlessly concrete. Quote the learner's own framings when possible.
 - Don't fabricate content that wasn't in the conversation.
-- Math notation: keep formulas in LaTeX with $...$ (inline) / $$...$$ (display) — Obsidian renders these natively. Never wrap math in backticks; convert any unicode math (x², σ², ℏ, ∇, ∂) from the conversation into proper LaTeX. The key derivations and the resulting laws from the session belong in the note as display math.
 - "핵심 원리"는 결론만 적지 말고 **유도 골격**(가정 → 단계 → 결과 법칙)을 남기고, 가능하면 차원·극한 점검 한 줄로 검산할 것. 이것이 노트를 "외운 것"이 아니라 "다시 유도할 수 있는 것"으로 만든다.
+- 핵심 법칙은 유도 골격과 분리해 눈에 띄게 제시하고, 기호·가정·차원과 적용 경계를 함께 보존할 것.
 - If a section has nothing real to put in it, write a single italicized line like "_이번 세션에서 다루지 않음._".
 - Tags should reflect topic, not meta ("noether-theorem", "phase-transition", "hawking-radiation", not "physics", "study").
 - If the session substantially engaged one of the recurring cross-layer principles, ALSO include it as a tag: "symmetry", "least-action", "entropy", "information", "emergence". These power cross-layer recall in later sessions.
@@ -163,7 +163,7 @@ export function renderLookupsSection(lookups: LookupEntry[]): string {
       return `> [!${calloutType(l.depth)}]${fold} ${q} · _${depthLabel(l.depth)}_\n${questionLine}${indented}`;
     })
     .join("\n\n");
-  return `\n\n## 🔍 학습 중 찾아본 표현 (${lookups.length})\n\n${items}\n`;
+  return `\n\n## 학습 중 찾아본 표현 (${lookups.length})\n\n${items}\n`;
 }
 
 /**
@@ -180,7 +180,7 @@ export function renderTranscriptSection(transcript: ClaudeMessage[]): string {
   const msgs = (transcript ?? []).slice(1);
   if (msgs.length === 0) return "";
   const blocks = msgs.map((m) => {
-    const who = m.role === "user" ? "🙋 나" : "🤖 버디";
+    const who = m.role === "user" ? "나" : "버디";
     const content =
       typeof m.content === "string"
         ? m.content
@@ -197,25 +197,32 @@ export function renderTranscriptSection(transcript: ClaudeMessage[]): string {
   });
   // 메시지 사이는 callout 내부 빈 줄(`>`)로 구분.
   const inner = blocks.join("\n>\n");
-  return `\n\n## 💬 전체 대화\n\n> [!quote]- 펼쳐서 대화 전체 다시 보기 (${msgs.length}개 메시지)\n${inner}\n`;
+  return `\n\n## 전체 대화\n\n> [!quote]- 펼쳐서 대화 전체 다시 보기 (${msgs.length}개 메시지)\n${inner}\n`;
 }
 
 /**
- * renderTranscriptSection이 만든 "## 💬 전체 대화" callout을 다시 메시지 배열로 파싱.
+ * renderTranscriptSection이 만든 "## 전체 대화" callout을 다시 메시지 배열로 파싱.
  * 과거 세션 대화를 앱 안에서 다시 보여줄 때 사용(/api/note/conversation).
  * 형식을 renderTranscriptSection과 1:1로 맞춤: callout 안 각 줄은 `> `로 시작,
- * 화자는 `> **🙋 나**` / `> **🤖 버디**`, 메시지 사이는 빈 quote줄(`>`).
+ * 새 노트의 화자는 `> **나**` / `> **버디**`로 저장한다.
+ * 기존 노트의 emoji 화자 표기도 계속 읽으며, 메시지 사이는 빈 quote줄(`>`).
  * transcript 섹션이 없으면(옛 노트·구조화 실패) 빈 배열.
  */
 export function parseTranscriptSection(
   body: string,
 ): { role: "user" | "assistant"; content: string }[] {
-  const header = "## 💬 전체 대화";
+  // 새 노트는 emoji 없는 헤딩을 쓰되, 기존 vault의 emoji 헤딩도 계속 읽는다.
+  const headers = ["## 전체 대화", "## 💬 전체 대화"] as const;
   // transcript 섹션은 본문 맨 끝에 추가되므로 lastIndexOf — 요약/예제에 같은
   // 문자열이 우연히 먼저 나와도 진짜 섹션을 잡는다.
-  const hIdx = body.lastIndexOf(header);
+  const match = headers
+    .map((header) => ({ header, index: body.lastIndexOf(header) }))
+    .reduce((latest, candidate) =>
+      candidate.index > latest.index ? candidate : latest,
+    );
+  const hIdx = match.index;
   if (hIdx === -1) return [];
-  const lines = body.slice(hIdx + header.length).split("\n");
+  const lines = body.slice(hIdx + match.header.length).split("\n");
   const calloutStart = lines.findIndex((l) => /^>\s*\[!quote\]/.test(l));
   if (calloutStart === -1) return [];
 
@@ -235,10 +242,10 @@ export function parseTranscriptSection(
     }
   };
   for (const line of inner) {
-    const m = line.match(/^\*\*(🙋 나|🤖 버디)\*\*[ \t]*$/);
+    const m = line.match(/^\*\*((?:🙋 )?나|(?:🤖 )?버디)\*\*[ \t]*$/);
     if (m) {
       flush();
-      cur = { role: m[1] === "🙋 나" ? "user" : "assistant", content: "" };
+      cur = { role: m[1]!.endsWith("나") ? "user" : "assistant", content: "" };
     } else if (cur) {
       cur.content += (cur.content ? "\n" : "") + line;
     }
@@ -303,6 +310,7 @@ Now produce the structured note in the markdown format described above (TAGS lin
     system: STRUCTURE_SYSTEM,
     messages: [{ role: "user", content: userMsg }],
     maxTokens: 16000,
+    mathOutput: true,
   });
 
   const lookupsSection = renderLookupsSection(args.lookups ?? []);
@@ -325,7 +333,7 @@ Now produce the structured note in the markdown format described above (TAGS lin
       // (옛 동작은 transcript를 flat하게 + Learner/Claude 라벨로 덤프 → 첫 컨텍스트
       //  블록까지 쏟아져 가독성이 나빴음. renderTranscriptSection이 컨텍스트 제외 +
       //  나/버디 라벨 + 접이식 callout으로 처리.)
-      body: `> [!warning] 자동 구조화에 실패했어요 — 8섹션 정리는 생략됐지만, 아래 **💬 전체 대화** 토글에서 원문을 그대로 볼 수 있어요.${lookupsSection}${renderTranscriptSection(args.transcript)}`,
+      body: `> [!warning] 자동 구조화에 실패했어요 — 8섹션 정리는 생략됐지만, 아래 **전체 대화** 토글에서 원문을 그대로 볼 수 있어요.${lookupsSection}${renderTranscriptSection(args.transcript)}`,
       relatedNotePaths: args.related.map((r) => r.filePath),
     };
   }

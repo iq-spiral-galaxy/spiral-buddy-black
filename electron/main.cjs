@@ -506,7 +506,7 @@ function createSetupWindow() {
     width: 600,
     height: 640,
     title: "Spiral Buddy Black — 초기 설정",
-    backgroundColor: "#050507",
+    backgroundColor: "#f4f7fb",
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
@@ -532,8 +532,8 @@ async function createMainWindow() {
     minWidth: 800,
     minHeight: 600,
     title: "Spiral Buddy Black",
-    // 렌더러의 기본 dark theme가 뜨기 전 흰색 flash가 보이지 않게 맞춘다.
-    backgroundColor: "#080a0f",
+    // 렌더러의 기본 light theme와 맞춰 첫 페인트의 색상 점프를 막는다.
+    backgroundColor: "#f4f7fb",
     icon: path.join(__dirname, "build", "icon.png"),
     webPreferences: {
       preload: path.join(__dirname, "preload.cjs"),
