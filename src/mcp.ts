@@ -64,7 +64,7 @@ async function main() {
 
   const server = new McpServer({
     name: "spiral-buddy-black",
-    version: "0.6.11",
+    version: "0.6.12",
   });
 
   // ─────────────────────────────────────────────────────
@@ -883,7 +883,7 @@ async function main() {
   const local = roadmaps.filter((r) => r.source === "local").length;
   const curated = roadmaps.filter((r) => r.source === "curated").length;
   process.stderr.write(
-    `[spiral-buddy-black MCP] connected (v0.6.11)\n` +
+    `[spiral-buddy-black MCP] connected (v0.6.12)\n` +
       `  roadmap root: ${config.roadmapRoot ?? "(unset)"}\n` +
       `  curated org:  ${config.curatedOrg ?? "(disabled)"}\n` +
       `  vault:        ${vaultPath}\n` +
