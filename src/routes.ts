@@ -1329,25 +1329,30 @@ function registerAiRoutes(app: Hono, config: Config, client: ClaudeClient) {
     const session = body.sessionId ? getSession(body.sessionId) : undefined;
     const userQuestion = (body.userQuestion ?? "").trim();
 
+    const completionRule =
+      " 답변은 반드시 완결된 문장으로 끝낸다. 분량이 부족할 것 같으면 세부 내용을 줄이되 문장이나 목록 항목을 중간에서 끊지 않는다.";
     const systemByDepth: Record<string, string> = {
       concise:
         "사용자가 학습 대화 중에 모르는 개념을 빠르게 확인하려고 한다. " +
         "1-2 문장으로 핵심만 답한다. 부연 설명·예시·연관 개념 언급 금지. " +
-        "한국어로, 단정적인 정의 위주. 필요하면 핵심 수식 한 줄까지만.",
+        "한국어로, 단정적인 정의 위주. 필요하면 핵심 수식 한 줄까지만." +
+        completionRule,
       medium:
         "사용자가 학습 대화 중 모르는 개념을 좀 더 알고 싶어한다. " +
         "2-3 문단으로 정의 + 제1원리(왜 그렇게 되는가) + 한 줄 극한/직관. " +
-        "필요한 수식을 정확히 포함한다. 마크다운 사용 가능. 한국어로. 길어지지 말 것.",
+        "필요한 수식을 정확히 포함한다. 마크다운 사용 가능. 한국어로. 길어지지 말 것." +
+        completionRule,
       deep:
         "사용자가 학습 대화 중 모르는 개념을 깊이 있게 알고 싶어한다. " +
         "다음 구조로 마크다운 답변:\n" +
         "## 한 줄 정의\n## 제1원리 유도\n## 극한·경계 (언제 무너지나)\n## 흔한 직관의 함정\n## 관련 원리\n" +
-        "각 섹션 2-4문장, 필요한 수식 포함. 한국어. 형식은 정확히 지킬 것.",
+        "각 섹션 2-4문장, 필요한 수식 포함. 한국어. 형식은 정확히 지킬 것." +
+        completionRule,
     };
     const maxTokensByDepth: Record<string, number> = {
       concise: 280,
-      medium: 700,
-      deep: 2200,
+      medium: 1500,
+      deep: 3200,
     };
 
     const questionBlock = userQuestion
@@ -1361,7 +1366,7 @@ function registerAiRoutes(app: Hono, config: Config, client: ClaudeClient) {
       (systemByDepth[depth] ?? systemByDepth.medium ?? "") +
       "\n\n" +
       MATH_RENDER_NOTE;
-    const maxTokens = maxTokensByDepth[depth] ?? 700;
+    const maxTokens = maxTokensByDepth[depth] ?? maxTokensByDepth.medium!;
 
     return streamText(c, async (stream) => {
       let fullResponse = "";
